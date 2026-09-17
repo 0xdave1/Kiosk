@@ -85,6 +85,15 @@
   - **Live Funnel Interactivity**: Real-time urgency timer, video embed player, value stack breakdown, order bump toggle, and simulated confirmation dialog.
   - **Live Lead Capture**: Interactive consultation form with simulated submission state.
 
+### 4. Dynamic Multi-Tenant Subdomains & Brand Isolation Subsystem
+- **Subdomain Routing & Edge Rewrites**: Edge middleware rewrites `<tenant>.kioosk.online` to `/tenants/[slug]` and `<customdomain.com>` to `/domains/[domain]`.
+- **Client Favicon Isolation**: Client sites resolve their favicon dynamically to the tenant's uploaded logo or an auto-generated business monogram SVG, guaranteeing zero Kiosk platform branding on client web domains.
+- **Client Branded Preloader**: Live tenant site initial loads feature the client's logo instead of the Kiosk logo.
+- **Cinematic Under Construction Experience**:
+  - Automatically served when a tenant site is in `DRAFT` or `IN_REVIEW` status.
+  - Implements a cinematic, ambient dark theme with launch stage progress meters and direct WhatsApp communication channels.
+- **Universal Live Renderer (`<TenantLiveSite />`)**: Dynamically generates landing pages, sales funnels, and e-commerce stores with functional WhatsApp catalog checkout.
+
 ---
 
 ## Performance & Responsive System
@@ -92,14 +101,16 @@
 - **Fluid Mobile Scaling**: Root `rem` scaling configured in `globals.css`:
   - `html { font-size: 18px; }` on desktop.
   - `@media (max-width: 640px) { html { font-size: 16px; } }` for mobile viewports (< 640px).
+- **iOS Safari & Mobile Optimization**: Lenis smooth scroll pinning, hide-on-scroll navigation, touch-swipe gestures, and zero layout shift.
 - **Zero Gradients**: High-contrast, clean solid colors with slate/blue accents.
-- **Error Handling**: Native Next.js `not-found.tsx` fallback page handles 404 routes gracefully.
+- **Error Handling**: Native Next.js `not-found.tsx` fallback page handles 404 routes gracefully with official Kiosk branding.
 
 ---
 
 ## Security & Deployment
 
 - Deployments hosted on Vercel with automatic edge CDN caching for static assets.
+- Dual payment webhooks (`/api/webhooks/paystack`, `/api/webhooks/flutterwave`) with cryptographic HMAC signature verification and idempotency locks.
 - Input validation on onboarding and project wizard forms via Zod schemas.
 - Neon PostgreSQL database with PgBouncer connection pooling.
 - Transport Layer Security (TLS 1.3) across all endpoints.

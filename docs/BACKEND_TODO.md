@@ -38,6 +38,9 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 - [x] Custom Domain Rewriter (`<customdomain.com>` -> `/domains/[domain]`).
 - [x] Multi-tenant Cloudinary API endpoint (`/api/upload`) with namespace folder isolation.
 - [x] Dynamic Live Website Renderer (`<TenantLiveSite />`) for Landing Pages, Sales Funnels, and E-Commerce Stores.
+- [x] Dynamic Client Favicon: Injects client logo/monogram into subdomain/custom domain metadata (zero Kiosk branding leakage).
+- [x] Tenant Brand Preloader: Client's own logo displayed during live site loading states.
+- [x] Cinematic Under Construction fallback page for `DRAFT` and `IN_REVIEW` subdomains with inquiry links.
 - [x] 1-Click WhatsApp Commerce with pre-filled order messages.
 
 ---
@@ -46,9 +49,11 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 - [x] RBAC security module (`src/lib/auth/admin.ts`) guarding all `/admin/*` pages and `/api/admin/*` routes.
 - [x] Master Admin Bento Grid Dashboard (`/admin/page.tsx`) with real-time database KPIs.
 - [x] Fulfillment Queue (`/admin/projects/page.tsx`) with search and status filters.
+- [x] Customer profile picture / avatar rendering in Fulfillment Queue rows directly from PostgreSQL.
 - [x] Project Fulfillment & Launch Studio (`/admin/projects/[id]/page.tsx`):
   - Brand assets inspector (Logo full-res, media gallery, structured copy, offerings).
   - Published domain assignment (`https://brand.kioosk.online`).
+  - Interactive Revision Modal and client revision messaging.
   - Internal fulfillment notes.
   - 1-Click **"Publish Website & Email Client Launch Notification"** action.
 - [x] Users Directory (`/admin/users/page.tsx`) with role assignment.
@@ -69,6 +74,7 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 
 ## Phase 5: Payment Gateway & Subscriptions
 - [x] Flutterwave Multi-Plan Subscription Integration (3 tiers x 2 cycles).
-- [x] Webhook verification and signature hashing.
+- [x] Paystack Webhook Handler (`/api/webhooks/paystack`) with HMAC-SHA512 signature verification.
+- [x] Production security: strict requirement for `PAYSTACK_SECRET_KEY` and removal of mock bypasses in production.
 - [x] Automated invoice generation and payment idempotency.
 - [x] Grace period handling and renewal tracking.

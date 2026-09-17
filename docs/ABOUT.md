@@ -42,9 +42,18 @@ Logged-in clients access a sleek, professional dashboard featuring:
 
 Operations and fulfillment center for the Kiosk team:
 - **Bento Grid Operations Hub (`/admin`)**: Real-time KPI metrics (Queue, Builds In Progress, Live Sites, Revenue).
-- **Fulfillment Queue (`/admin/projects`)**: Filter, search, and inspect customer intake submissions.
+- **Fulfillment Queue (`/admin/projects`)**: Filter, search, and inspect customer intake submissions with real customer profile avatars and revision management.
 - **Fulfillment & Launch Studio (`/admin/projects/[id]`)**: Full brand assets review, published domain assignment, and 1-click **"Publish Website & Email Client Launch Notification"**.
 - **Users & Billing Hubs (`/admin/users`, `/admin/billing`)**: Manage accounts, roles, and master subscription revenue.
+
+---
+
+## Multi-Tenant Subdomain & Brand Isolation
+
+Client sites hosted on Kiosk receive 100% brand isolation:
+- **Dynamic Client Favicon**: Client subdomains and custom domains serve the tenant's brand logo (or custom SVG monogram) as their favicon, never the Kiosk logo.
+- **Client Branded Preloader**: Live sites render a smooth loading screen featuring the client's own logo.
+- **Cinematic Under Construction Screen**: Unpublished subdomains (`DRAFT` / `IN_REVIEW`) display an ambient, animated status screen with progress tracking and direct WhatsApp inquiry buttons.
 
 ---
 

@@ -14,7 +14,8 @@ Most small business owners don't need a complicated website builder. They just n
 
 ### Multi-Tenant Capabilities
 - **Tenant Workspace Isolation**: Row-level database isolation (`tenants` table) for projects, billing subscriptions, and custom domains.
-- **Custom Domains & Subdomains**: Dynamic routing via Next.js Edge Middleware (`business.kiosk.site` or `customdomain.com`).
+- **Custom Domains & Subdomains**: Dynamic routing via Next.js Edge Middleware (`business.kioosk.online` or `customdomain.com`).
+- **Brand Isolation**: Dedicated client dynamic favicon, client-branded preloader, and cinematic Under Construction page for unlaunched subdomains.
 - **Subscription Packages**:
   - **Landing Page ($20/mo, $192/yr)** — A simple, professional page with business info, contact details, and WhatsApp integration.
   - **Sales Funnel ($30/mo, $288/yr)** — Up to 5 conversion pages with lead capture and CRM integration.
@@ -26,6 +27,7 @@ Everything is hosted and managed for you. No technical setup. No complicated bui
 
 ## Documentation Links
 
+- Product Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Multi-Tenant Architecture & About: [docs/ABOUT.md](docs/ABOUT.md)
 - Backend Architecture: [docs/BACKEND_ARCHITECTURE.md](docs/BACKEND_ARCHITECTURE.md)
 - Backend System Design: [docs/BACKEND_SYSTEM_DESIGN.md](docs/BACKEND_SYSTEM_DESIGN.md)
@@ -59,9 +61,12 @@ Open http://localhost:3000 to preview locally.
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router & Edge Middleware)
-- **Database & ORM**: Drizzle ORM + PostgreSQL (Multi-tenant schema)
+- **Database & ORM**: Drizzle ORM + Neon PostgreSQL (Multi-tenant schema)
 - **Authentication**: Auth.js v5 (NextAuth) + Password Hashing (bcryptjs 12 rounds)
-- **Rate Limiting**: Upstash Redis (Sliding Window)
+- **Payments**: Paystack & Flutterwave (HMAC-SHA512 Webhooks & Subscriptions)
+- **Media Storage**: Cloudinary (Multi-tenant isolated buckets)
+- **Transactional Email**: Resend API (`src/lib/email.ts`)
+- **Rate Limiting & Cache**: Upstash Redis (Sliding Window & Idempotency Locks)
 - **Styling**: Vanilla Tailwind CSS v4 & custom utility design tokens
 - **Animations**: GSAP, Framer Motion, Lenis Smooth Scroll
 

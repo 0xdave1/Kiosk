@@ -94,15 +94,20 @@ src/
 │       ├── admin/              # Protected admin REST endpoints (/stats, /projects, /users, /billing)
 │       ├── auth/               # Register, Login, Logout, Session handlers
 │       ├── upload/route.ts     # Multi-tenant Cloudinary upload endpoint
-│       └── projects/content/   # Customer intake submission endpoint with email alerts
+│       ├── projects/content/   # Customer intake submission endpoint with email alerts
+│       └── webhooks/           # Payment webhooks (/paystack, /flutterwave)
 │
 ├── components/
 │   ├── admin/
-│   │   └── AdminDock.tsx       # Floating Dock navigation for Admin Portal
+│   │   ├── AdminDock.tsx       # Floating Dock navigation for Admin Portal
+│   │   └── FulfillmentQueue.tsx# Admin queue with user avatar integration
 │   ├── tenant/
-│   │   └── TenantLiveSite.tsx  # Universal live website renderer for client sites
+│   │   ├── TenantLiveSite.tsx  # Universal live website renderer for client sites
+│   │   ├── TenantPreloader.tsx # Dynamic loader using client brand logo
+│   │   └── UnderConstruction.tsx # Cinematic animated screen for unlaunched subdomains
 │   ├── dashboard/
 │   │   ├── Dock.tsx            # Floating interactive dock navigation
+│   │   ├── RevisionModal.tsx   # Client revision management modal
 │   │   └── ProjectCard.tsx     # Project status card
 │   ├── Navbar.tsx              # Public header
 │   └── PillButton.tsx          # Interactive animated pill button
@@ -120,13 +125,39 @@ src/
 Kiosk is built around a **streamlined submission model** rather than a complex drag-and-drop builder:
 
 1. **Client Submits Info**: The business owner fills in structured form fields (Brand Name, Tagline, Story, Logo, Theme Mode, Products/Services, Contact, WhatsApp).
-2. **Operations Fulfillment**: The Kiosk team reviews submissions in the Admin Studio (`/admin/projects/[id]`), tests links, assigns domains, and clicks **Publish**.
+2. **Operations Fulfillment**: The Kiosk team reviews submissions in the Admin Studio (`/admin/projects/[id]`), inspects assets, tests links, assigns domains, and clicks **Publish**.
 3. **Dynamic Multi-Tenant Rendering**: Visiting `https://<slug>.kioosk.online` dynamically pulls the client's persisted data from PostgreSQL and renders a responsive, high-converting live website with 1-click WhatsApp checkout.
+
+---
+
+## Subdomain & Custom Domain Tenant Isolation
+
+To ensure client sites maintain their unique brand identity and never leak Kiosk branding:
+
+1. **Client-Specific Dynamic Favicon**:
+   - Subdomains (`<tenant>.kioosk.online`) and custom domains (`<domain>.com`) dynamically set their favicon to the tenant's uploaded brand logo.
+   - If no logo is provided, an SVG monogram matching the business name is generated on-the-fly. Kiosk's own favicon is strictly isolated from tenant domains.
+2. **Branded Tenant Preloader**:
+   - The initial loading transition on client domains displays the client's logo (or business monogram) instead of the Kiosk platform logo.
+3. **Cinematic Animated Under Construction Screen**:
+   - For subdomains or custom domains not yet published (status: `DRAFT` or `IN_REVIEW`), visitors receive a clean, cinematic dark-mode Under Construction page.
+   - Features animated status badges, dynamic progress tracker, and direct WhatsApp contact trigger so the client can still capture inquiries before launch.
 
 ---
 
 ## Operations & Fulfillment Flow
 
 1. **Submission Alert**: When a customer submits on `/dashboard/content`, an email alert is sent to `kioskonline3@gmail.com` and a confirmation receipt is sent to the client.
-2. **Review in Admin Hub**: The submission appears live on `/admin/projects`.
-3. **One-Click Launch**: In `/admin/projects/[id]`, setting status to `Live` (100%) and clicking **"Publish Website & Email Client Launch Notification"** triggers the client launch email and activates the live site.
+2. **Review in Admin Hub (`/admin/projects`)**:
+   - The submission appears in the Fulfillment Queue.
+   - User profile pictures and avatars from the database are displayed directly in the queue items instead of generic single-letter initials.
+3. **Revision Workflow**: The team can trigger revisions via the revision flow, sending instructions to the client dashboard and notifying the user.
+4. **One-Click Launch**: In `/admin/projects/[id]`, setting status to `Live` (100%) and clicking **"Publish Website & Email Client Launch Notification"** triggers the client launch email and activates the live site.
+
+---
+
+## Payment Gateways & Webhook Infrastructure
+
+Kiosk supports dual payment gateways:
+- **Paystack (`/api/webhooks/paystack`)**: Signature verification via `x-paystack-signature` HMAC SHA512, strict production secret requirement, transaction verification, and automatic tenant activation.
+- **Flutterwave (`/api/webhooks/flutterwave`)**: Secret hash header verification, idempotency locks via Upstash Redis (`SETNX`), and subscription cycle handling.

@@ -82,10 +82,24 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 
 ---
 
-## 6. Production Deployment Pre-Flight & Infrastructure
+## 6. Multi-Tenant Subdomain Isolation & Brand Identity
 
-- [x] **Wildcard Subdomain Middleware Audit**: Verify `<client>.kiosk.site` header forwarding and edge routing in `src/middleware.ts`.
-- [x] **TypeScript Strict Check**: Execute `node node_modules/typescript/lib/tsc.js --noEmit` locally (0 errors verified).
+- [x] **Subdomain Dynamic Favicon**: Replaced generic Kiosk favicon on subdomains with the tenant's brand logo (or auto-generated SVG monogram).
+- [x] **Subdomain Brand Preloader**: Implemented loading screen using the client's logo instead of Kiosk platform branding.
+- [x] **Cinematic Under Construction Page**: Animated dark-mode page for unlaunched subdomains (`DRAFT` / `IN_REVIEW`) featuring live progress indicators and WhatsApp contact trigger.
+- [x] **Admin Fulfillment User Profile Pictures**: Display real customer avatars/profile pictures in the fulfillment queue (`/admin/projects`) instead of single-letter initials.
+- [x] **Client Revision Modal**: Interactive revision management workflow in the admin studio and client dashboard.
+- [x] **Kiosk Project Logo Integration**: Replaced placeholder "K" box in `/dashboard` header and `/not-found` page with official `/KIOSK PNG2.png` logo.
+- [x] **Mobile Responsiveness & iOS Safari Performance**: Fixed scroll animation containing block transforms, added hide-on-scroll navigation, and implemented touch-friendly swipe gestures with pagination dots.
+- [x] **Contact Page Interactive PillButton**: Upgraded the message submission CTA on `/contact` to use the animated `PillButton` component.
+- [x] **Paystack Webhook & Production Security**: Implemented HMAC-SHA512 webhook signature verification, strict production key enforcement, and payment reconciliation.
+
+---
+
+## 7. Production Deployment Pre-Flight & Infrastructure
+
+- [x] **Wildcard Subdomain Middleware Audit**: Verify `<client>.kioosk.online` header forwarding and edge routing in `src/middleware.ts`.
+- [x] **TypeScript Strict Check**: Execute `npx tsc --noEmit` locally (0 errors verified).
 
 ---
 
@@ -94,13 +108,18 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 | Category | High Priority Task | Status | Target Deliverable |
 | :--- | :--- | :---: | :--- |
 | **Design / UI** | Hero Section Redesign & Interactive Card | Completed | `src/components/Hero.tsx` |
-| **Design / UI** | Design Typos & Visual Audit Adjustments | Completed | Clean visual standards |
+| **Design / UI** | Dashboard & 404 Official Kiosk Logo | Completed | `src/app/dashboard/page.tsx` |
+| **Design / UI** | Contact Page PillButton Submission CTA | Completed | `src/app/contact/page.tsx` |
+| **Branding** | Subdomain Dynamic Favicon & Preloader | Completed | `src/app/tenants/[slug]/` |
+| **Branding** | Cinematic Under Construction Page | Completed | `src/components/tenant/UnderConstruction.tsx` |
+| **Admin** | Fulfillment Queue Real Avatars & Revision Modal | Completed | `src/app/admin/projects/` |
 | **Studio** | Content Studio with Live Preview & Dark Mode | Completed | `src/app/dashboard/content/` |
 | **Templates** | Templates Directory with Live Modals | Completed | `src/app/dashboard/templates/` |
 | **Auth** | 6-Hour Session Token & Checkout Grace Window | Completed | `src/lib/auth/session.ts` |
+| **Payments** | Paystack & Flutterwave Webhook Integration | Completed | `src/app/api/webhooks/` |
 | **E-Commerce** | Multi-Currency Catalog & WhatsApp Ordering | Completed | Content Studio & Preview |
-| **Async Bus** | Upstash QStash Event Bus Setup | Completed | `src/lib/events/` |
 | **Testing** | Playwright E2E Test Suite | Completed | `*.e2e-spec.ts` |
+| **Performance**| iOS Safari Scroll & Mobile Gesture Polish | Completed | `src/components/` |
 | **DevOps** | GitHub Actions CI/CD Pipeline | Completed | `.github/workflows/` |
 | **Deploy** | Production Pre-Flight Audit | Ready | Vercel & Neon Setup |
 
@@ -112,4 +131,5 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 2. **Build Success**: `npm run build` generates optimized production bundles without warnings or failures.
 3. **Template Coverage**: Interactive presets and content studio available across all subscription tiers.
 4. **UI Design Standard**: 100% clean solid typography, zero gradients, authentic mobile frame mockup, and sleek dark mode preview.
+
 

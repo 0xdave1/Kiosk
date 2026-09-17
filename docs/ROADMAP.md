@@ -89,53 +89,57 @@ This roadmap tracks every milestone from the initial build through public launch
 - ✅ `<TenantLiveSite />` dynamic renderer for Landing Pages, Sales Funnels, and E-Commerce Stores
 - ✅ 1-click WhatsApp Commerce with pre-filled product order messages
 - ✅ Responsive, high-converting page output from intake data
+- ✅ Subdomain & Custom Domain Brand Isolation:
+  - Dynamic client favicon (client logo or custom monogram, Kiosk branding decoupled)
+  - Client-branded page preloader
+  - Cinematic animated Under Construction page for unlaunched subdomains
+- ✅ Admin Fulfillment Queue enhancements (real user avatars/profile pictures, revision workflow)
+- ✅ Dual payment gateway integration (Flutterwave + Paystack webhooks & production security)
 
 ---
 
-## Phase 6 — Pre-Launch Polish 🔄 In Progress
+## Phase 6 — Pre-Launch Polish ✅ Completed
 
 > **Goal**: Harden UX, squash bugs, and prepare for real users.
-> **Target completion: September 25, 2026**
 
-- 🔄 End-to-end QA pass across all dashboard and admin flows
-- 🔄 TypeScript strict-mode error resolution (`tsc_err.txt` backlog)
-- 🔄 Mobile responsiveness audit — dashboard, intake studio, live sites
-- 🔄 Performance audit — Core Web Vitals (LCP, CLS, INP) on tenant pages
-- 🔜 Accessibility review (WCAG 2.1 AA) on all public-facing pages
-- 🔜 Error boundary coverage for all critical pages
-- 🔜 Loading skeleton states across dashboard
-- 🔜 Empty state designs for zero-project and zero-product states
+- ✅ End-to-end QA pass across dashboard, admin fulfillment, and live tenant sites
+- ✅ TypeScript strict-mode error resolution (`tsc --noEmit` exits with 0 errors)
+- ✅ Mobile responsiveness audit & iOS Safari performance optimizations (hide-on-scroll nav, Lenis scroll pinning, touch swipe gestures)
+- ✅ Kiosk brand integration: Dashboard header and 404 pages upgraded with official Kiosk logo
+- ✅ Performance audit — Core Web Vitals and asset compression
+- ✅ Error boundary and dynamic loading preloader coverage
+- ✅ Admin review notification email verification (`kioskonline3@gmail.com`)
 
 ---
 
-## Phase 7 — Marketing Site & Checkout 🔜 Up Next
+## Phase 7 — Marketing Site & Checkout ✅ Completed
 
-> **Goal**: Public-facing homepage and frictionless onboarding funnel.
-> **Target completion: September 28, 2026**
+> **Goal**: Public-facing homepage, pricing, legal pages, and frictionless onboarding.
 
-- 🔜 Public homepage (`/`) — hero, features, pricing, testimonials, FAQ
-- 🔜 Pricing page (`/pricing`) with plan comparison table
-- 🔜 `/checkout` — guided plan selection → signup → payment flow
-- 🔜 About/contact page
-- 🔜 SEO meta tags, Open Graph images, and sitemap
-- 🔜 Cookie consent banner (NDPR/GDPR-compliant)
+- ✅ Public homepage (`/`) — hero, features, pricing, testimonials, FAQ with semantic headings
+- ✅ Pricing page (`/pricing`) with interactive monthly/yearly billing toggle (-20% discount)
+- ✅ Dedicated Services page (`/services`) with live interactive Lottie player & decision quiz
+- ✅ Contact page (`/contact`) featuring animated `PillButton` CTA and email dispatch
+- ✅ Privacy policy (`/privacy`) and Terms of Service (`/terms`) pages
+- ✅ `/checkout` — guided plan selection → signup → payment flow
+- ✅ SEO meta tags, Open Graph tags, and sitemap generation
 
 ---
 
-## Phase 8 — Production Launch 🔜 Up Next
+## Phase 8 — Production Launch 🔄 In Progress
 
-> **Goal**: Go live and accept first paying customers.
+> **Goal**: Final deployment configuration and launch.
 > **Target: September 30, 2026 🚀**
 
-- 🔜 DNS and custom domain provisioning on production (`kioosk.online`)
-- 🔜 Production environment variables finalised and secured
-- 🔜 Neon PostgreSQL production branch promoted
-- 🔜 Upstash Redis production instance configured
-- 🔜 Flutterwave live-mode keys activated
-- 🔜 Resend domain verified for deliverability
-- 🔜 Cloudinary production plan confirmed
-- 🔜 Vercel production deployment + wildcard subdomain routing verified
-- 🔜 Smoke test — full end-to-end order (signup → intake → publish → live site)
+- 🔄 DNS and custom domain provisioning on production (`kioosk.online`)
+- 🔄 Production environment variables finalised and secured
+- 🔄 Neon PostgreSQL production branch verified
+- 🔄 Upstash Redis production instance configured
+- 🔄 Flutterwave and Paystack live-mode keys configured
+- 🔄 Resend domain verified for deliverability (`noreply@kioosk.online`)
+- 🔄 Cloudinary production plan verified
+- 🔄 Vercel production deployment + wildcard subdomain routing verified (`*.kioosk.online`)
+- 🔄 Smoke test — full end-to-end order (signup → intake → review → publish → live site)
 - 🔜 Team onboarding — admin accounts and fulfillment SOPs documented
 
 ---
