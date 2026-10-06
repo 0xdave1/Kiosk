@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { processPdfInvoiceJob } from "@/inngest/functions/pdfInvoice";
+import { processAutoBuildJob } from "@/inngest/functions/autoBuilder";
 
 /**
  * POST /api/inngest - Executes serverless background worker jobs
@@ -13,6 +14,11 @@ export async function POST(request: Request) {
 
 		if (event === "kiosk/payment.completed" && data) {
 			const result = await processPdfInvoiceJob(data);
+			return NextResponse.json({ status: "completed", result });
+		}
+
+		if (event === "kiosk/project.autobuild" && data) {
+			const result = await processAutoBuildJob(data);
 			return NextResponse.json({ status: "completed", result });
 		}
 

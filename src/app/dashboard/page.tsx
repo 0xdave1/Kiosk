@@ -561,23 +561,43 @@ export default function DashboardPage() {
 										</button>
 									</div>
 
-									<h2 className="text-xl sm:text-2xl font-bold font-nohemi text-gray-900 mb-2">
+									<h2 className="text-xl sm:text-2xl font-bold font-nohemi text-gray-900 mb-1">
 										{activeProject.name}
 									</h2>
-									<p className="text-xs text-gray-500 font-medium mb-6 max-w-md leading-relaxed">
-										Your {activeProject.type.toLowerCase()} project is currently{" "}
-										{activeProject.progress}% complete. Our team is personalizing your content.
+									<p className="text-xs text-gray-500 font-medium mb-4 max-w-md leading-relaxed">
+										{activeProject.status === "Live" || activeProject.progress === 100
+											? `Your ${activeProject.type.toLowerCase()} is published and live for customers!`
+											: activeProject.progress >= 85
+											? `Autonomous builder is assembling and publishing your ${activeProject.type.toLowerCase()}...`
+											: `Your ${activeProject.type.toLowerCase()} project is currently ${activeProject.progress}% complete.`}
 									</p>
+
+									{activeProject.publishedUrl && (activeProject.status === "Live" || activeProject.progress === 100) && (
+										<div className="mb-5">
+											<a
+												href={activeProject.publishedUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition-all border border-emerald-200 shadow-2xs">
+												<Globe className="w-3.5 h-3.5 text-emerald-600" />
+												<span>Visit Live Website ↗</span>
+											</a>
+										</div>
+									)}
 
 									{/* Progress Bar */}
 									<div className="space-y-1.5 mb-6">
 										<div className="flex justify-between text-xs font-bold text-gray-700">
 											<span>Build Progress</span>
-											<span>{activeProject.progress}%</span>
+											<span className={activeProject.progress === 100 ? "text-emerald-600 font-black" : ""}>
+												{activeProject.progress}% {activeProject.progress === 100 ? "• Live" : ""}
+											</span>
 										</div>
 										<div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
 											<div
-												className="h-full bg-blue-600 rounded-full transition-all duration-500"
+												className={`h-full rounded-full transition-all duration-500 ${
+													activeProject.progress === 100 ? "bg-emerald-500" : "bg-blue-600"
+												}`}
 												style={{ width: `${activeProject.progress}%` }}
 											/>
 										</div>

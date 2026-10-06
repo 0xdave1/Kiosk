@@ -1,6 +1,6 @@
 /** @format */
 
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
 import { tenants, projects } from "@/db/schema";
@@ -13,6 +13,7 @@ import {
 	sendWebsiteReviewNotificationToAdmin,
 	sendWebsiteReviewConfirmationToClient,
 } from "@/lib/email";
+import { processAutoBuildJob } from "@/inngest/functions/autoBuilder";
 
 const contentPayloadSchema = z.object({
 	projectId: z.string().optional(),
@@ -201,6 +202,7 @@ export async function POST(request: Request) {
 
 		// Update specific Project Progress to 85% & Status to "In Review"
 		// Update specific Project Progress to 85%, Status to "In Review", and store content in database
+		let targetProjectId = projectId;
 		if (projectId) {
 			await db
 				.update(projects)
@@ -216,6 +218,7 @@ export async function POST(request: Request) {
 				where: eq(projects.tenantId, tenant.id),
 			});
 			if (userProjects.length > 0) {
+				targetProjectId = userProjects[0].id;
 				await db
 					.update(projects)
 					.set({
@@ -269,7 +272,7 @@ export async function POST(request: Request) {
 			imagesCount: contentData.uploadedImages?.length || 0,
 			productsCount: contentData.products?.length || 0,
 			servicesCount: contentData.services?.length || 0,
-			projectId: projectId || undefined,
+			projectId: targetProjectId || undefined,
 			contactPhone: contentData.contactPhone,
 			contactEmail: contentData.contactEmail,
 			whatsappLink: contentData.whatsappLink,
@@ -279,9 +282,38 @@ export async function POST(request: Request) {
 			Logger.error("Failed to send review notification email to admin", err);
 		});
 
-		Logger.info("Saved project content & brand assets and dispatched review emails", {
+		// Trigger Autonomous Background Tenant Website Builder
+		if (targetProjectId) {
+			const autoBuildPayload = {
+				projectId: targetProjectId,
+				tenantId: tenant.id,
+				contentData,
+				userEmail: clientEmail,
+				userName: clientName,
+				plan: contentData.plan || tenant.plan,
+			};
+
+			try {
+				if (typeof after === "function") {
+					after(async () => {
+						await processAutoBuildJob(autoBuildPayload);
+					});
+				} else {
+					processAutoBuildJob(autoBuildPayload).catch((buildErr) => {
+						Logger.error("Background auto-build execution failed", buildErr);
+					});
+				}
+			} catch {
+				processAutoBuildJob(autoBuildPayload).catch((buildErr) => {
+					Logger.error("Background auto-build execution fallback failed", buildErr);
+				});
+			}
+		}
+
+		Logger.info("Saved project content & queued autonomous website builder", {
 			tenantId: tenant.id,
 			businessName: contentData.businessName,
+			projectId: targetProjectId,
 		});
 
 		return NextResponse.json({ success: true, content: contentData });
