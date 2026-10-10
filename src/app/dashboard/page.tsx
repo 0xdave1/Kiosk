@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PillButton from "@/components/PillButton";
 import RevisionModal from "@/components/dashboard/RevisionModal";
+import QuickEditModal from "@/components/dashboard/QuickEditModal";
 import {
 	FolderOpen,
 	Globe,
@@ -30,6 +31,9 @@ import {
 	Layers,
 	Edit3,
 	ArrowRight,
+	BarChart3,
+	TrendingUp,
+	Zap,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -43,6 +47,7 @@ export default function DashboardPage() {
 	const [isSupportOpen, setIsSupportOpen] = useState(false);
 	const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 	const [isRevisionOpen, setIsRevisionOpen] = useState(false);
+	const [isQuickEditOpen, setIsQuickEditOpen] = useState(false);
 	const [supportMessage, setSupportMessage] = useState("");
 	const [supportSent, setSupportSent] = useState(false);
 	const [isSendingSupport, setIsSendingSupport] = useState(false);
@@ -52,6 +57,11 @@ export default function DashboardPage() {
 	const [projectsList, setProjectsList] = useState<any[]>([]);
 	const [tenantInfo, setTenantInfo] = useState<any | null>(null);
 	const [isLoadingProjects, setIsLoadingProjects] = useState(true);
+	const [analyticsSummary, setAnalyticsSummary] = useState<{
+		totalViews: number;
+		whatsappClicks: number;
+		conversionRate: number;
+	} | null>(null);
 
 	const notifRef = useRef<HTMLDivElement>(null);
 	const profileRef = useRef<HTMLDivElement>(null);
@@ -85,9 +95,10 @@ export default function DashboardPage() {
 		async function fetchUserData() {
 			try {
 				setIsLoadingProjects(true);
-				const [projRes, contentRes] = await Promise.all([
+				const [projRes, contentRes, analyticsRes] = await Promise.all([
 					fetch("/api/projects"),
 					fetch("/api/projects/content"),
+					fetch("/api/analytics?range=30d"),
 				]);
 
 				if (projRes.ok) {
@@ -99,6 +110,13 @@ export default function DashboardPage() {
 				if (contentRes.ok) {
 					const cData = await contentRes.json();
 					setSavedContent(cData.content || null);
+				}
+
+				if (analyticsRes.ok) {
+					const aData = await analyticsRes.json();
+					if (aData.summary) {
+						setAnalyticsSummary(aData.summary);
+					}
 				}
 			} catch (err) {
 				console.error("[FETCH_DATA_ERROR]", err);
@@ -478,6 +496,16 @@ export default function DashboardPage() {
 										type="button"
 										onClick={() => {
 											setIsProfileOpen(false);
+											router.push("/dashboard/analytics");
+										}}
+										className="w-full flex items-center px-3 py-2 rounded-xl text-xs font-medium text-gray-700 hover:bg-gray-100/80 hover:text-gray-900 transition-colors duration-150 cursor-pointer">
+										<span>Traffic & WhatsApp</span>
+									</button>
+
+									<button
+										type="button"
+										onClick={() => {
+											setIsProfileOpen(false);
 											router.push("/dashboard/settings");
 										}}
 										className="w-full flex items-center px-3 py-2 rounded-xl text-xs font-medium text-gray-700 hover:bg-gray-100/80 hover:text-gray-900 transition-colors duration-150 cursor-pointer">
@@ -552,13 +580,23 @@ export default function DashboardPage() {
 											<span>Active Workspace</span>
 										</div>
 
-										<button
-											type="button"
-											onClick={() => setIsPreviewOpen(true)}
-											className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors cursor-pointer border border-blue-200/60">
-											<ExternalLink className="w-3.5 h-3.5" />
-											<span>Preview Your Site →</span>
-										</button>
+										<div className="flex items-center gap-2">
+											<button
+												type="button"
+												onClick={() => setIsQuickEditOpen(true)}
+												className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors cursor-pointer border border-indigo-200/60 shadow-2xs">
+												<Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+												<span>Quick Edit</span>
+											</button>
+
+											<button
+												type="button"
+												onClick={() => setIsPreviewOpen(true)}
+												className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors cursor-pointer border border-blue-200/60">
+												<ExternalLink className="w-3.5 h-3.5" />
+												<span>Preview →</span>
+											</button>
+										</div>
 									</div>
 
 									<h2 className="text-xl sm:text-2xl font-bold font-nohemi text-gray-900 mb-1">
@@ -638,6 +676,13 @@ export default function DashboardPage() {
 									<div className="flex items-center gap-2 sm:gap-3">
 										<button
 											type="button"
+											onClick={() => setIsQuickEditOpen(true)}
+											className="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 cursor-pointer">
+											<Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+											<span>Quick Edit</span>
+										</button>
+										<button
+											type="button"
 											onClick={() => setIsRevisionOpen(true)}
 											className="text-xs font-bold text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
 											Request Revision
@@ -645,7 +690,7 @@ export default function DashboardPage() {
 										<Link
 											href={`/dashboard/content?projectId=${activeProject.id}&plan=${encodeURIComponent(activeProject.type)}`}
 											className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1">
-											<span>Continue Editing →</span>
+											<span>Full Content →</span>
 										</Link>
 									</div>
 								</div>
@@ -668,23 +713,29 @@ export default function DashboardPage() {
 								</div>
 							</div>
 
-							<div className="bg-white border border-gray-200/90 rounded-3xl p-5 flex flex-col justify-between hover:border-blue-500/40 transition-all duration-200 shadow-2xs">
-								<div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-									<Globe className="w-4 h-4" />
+							<Link
+								href="/dashboard/analytics"
+								className="bg-white border border-gray-200/90 rounded-3xl p-5 flex flex-col justify-between hover:border-indigo-500/40 transition-all duration-200 shadow-2xs group cursor-pointer">
+								<div className="flex items-center justify-between mb-3">
+									<div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+										<BarChart3 className="w-4 h-4" />
+									</div>
+									<span className="text-[10px] font-bold text-indigo-600 group-hover:underline flex items-center gap-0.5">
+										Analytics →
+									</span>
 								</div>
 								<div>
-									<p className="text-xl sm:text-2xl font-bold font-nohemi text-gray-900">
-										{(() => {
-											const p = (tenantInfo?.plan || "").toUpperCase();
-											if (p.includes("COMMERCE") || p.includes("STORE")) return "E-Commerce";
-											if (p.includes("FUNNEL")) return "Sales Funnel";
-											if (p.includes("LANDING")) return "Landing Page";
-											return "Free Plan";
-										})()}
-									</p>
-									<p className="text-xs text-gray-500 font-medium">Active Plan</p>
+									<div className="flex items-baseline gap-2">
+										<p className="text-2xl font-bold font-nohemi text-gray-900">
+											{analyticsSummary?.totalViews ?? 0}
+										</p>
+										<span className="text-[11px] font-bold text-emerald-600">
+											{analyticsSummary?.whatsappClicks ?? 0} leads
+										</span>
+									</div>
+									<p className="text-xs text-gray-500 font-medium">Traffic & WhatsApp</p>
 								</div>
-							</div>
+							</Link>
 						</div>
 
 						{/* BENTO TILE 3: Current Plan & Upgrade Tile (Span 1 col) */}
@@ -773,17 +824,46 @@ export default function DashboardPage() {
 								Quick Actions
 							</h3>
 
-							<div className="grid grid-cols-2 gap-3">
-								<Link
-									href="/dashboard/content"
-									className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 hover:bg-emerald-50 transition-colors flex items-center gap-3 group">
-									<FileEdit className="w-5 h-5 text-emerald-600 shrink-0" />
+							<div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+								<button
+									type="button"
+									onClick={() => setIsQuickEditOpen(true)}
+									className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 hover:bg-indigo-50 transition-colors flex items-center gap-3 text-left group cursor-pointer">
+									<Sparkles className="w-5 h-5 text-indigo-600 shrink-0" />
 									<div>
-										<p className="text-xs font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
-											Submit Copy
+										<p className="text-xs font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+											Quick-Edit Site
 										</p>
 										<p className="text-[10px] text-gray-500 font-medium">
-											Upload content
+											Instant changes
+										</p>
+									</div>
+								</button>
+
+								<Link
+									href="/dashboard/analytics"
+									className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 hover:bg-emerald-50 transition-colors flex items-center gap-3 group">
+									<BarChart3 className="w-5 h-5 text-emerald-600 shrink-0" />
+									<div>
+										<p className="text-xs font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+											Traffic Analytics
+										</p>
+										<p className="text-[10px] text-gray-500 font-medium">
+											Views & WhatsApp
+										</p>
+									</div>
+								</Link>
+
+								<Link
+									href="/dashboard/content"
+									className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 hover:bg-blue-50 transition-colors flex items-center gap-3 group">
+									<FileEdit className="w-5 h-5 text-blue-600 shrink-0" />
+									<div>
+										<p className="text-xs font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+											Full Content
+										</p>
+										<p className="text-[10px] text-gray-500 font-medium">
+											Comprehensive
 										</p>
 									</div>
 								</Link>
@@ -791,11 +871,11 @@ export default function DashboardPage() {
 								<button
 									type="button"
 									onClick={() => setIsRevisionOpen(true)}
-									className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 hover:bg-blue-50 transition-colors flex items-center gap-3 text-left group cursor-pointer">
-									<MessageSquare className="w-5 h-5 text-blue-600 shrink-0" />
+									className="p-4 rounded-2xl bg-cyan-50/50 border border-cyan-100 hover:bg-cyan-50 transition-colors flex items-center gap-3 text-left group cursor-pointer">
+									<MessageSquare className="w-5 h-5 text-cyan-600 shrink-0" />
 									<div>
-										<p className="text-xs font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-											Request Revision
+										<p className="text-xs font-bold text-gray-900 group-hover:text-cyan-600 transition-colors">
+											Revisions
 										</p>
 										<p className="text-[10px] text-gray-500 font-medium">
 											Send feedback
@@ -1045,6 +1125,12 @@ export default function DashboardPage() {
 			<RevisionModal
 				isOpen={isRevisionOpen}
 				onClose={() => setIsRevisionOpen(false)}
+			/>
+
+			{/* Quick-Edit Studio Modal */}
+			<QuickEditModal
+				isOpen={isQuickEditOpen}
+				onClose={() => setIsQuickEditOpen(false)}
 			/>
 		</div>
 	);

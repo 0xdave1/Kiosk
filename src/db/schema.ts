@@ -206,3 +206,22 @@ export const invoices = pgTable("invoices", {
 	createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
 	updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
 });
+
+/**
+ * 10. Analytics Events Table (Tenant Website Traffic, Views & WhatsApp Conversions)
+ */
+export const analyticsEvents = pgTable("analytics_events", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	tenantId: text("tenantId")
+		.notNull()
+		.references(() => tenants.id, { onDelete: "cascade" }),
+	type: text("type").notNull(), // "PAGE_VIEW" | "WHATSAPP_CLICK" | "CALL_CLICK" | "OFFERING_CLICK"
+	visitorId: text("visitorId"), // Anonymized salt hash for unique visitor metrics
+	device: text("device").default("desktop"), // "mobile" | "desktop" | "tablet"
+	referrer: text("referrer"), // e.g. "google", "instagram", "whatsapp", "direct"
+	path: text("path").default("/"),
+	createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+});
+

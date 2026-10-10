@@ -65,7 +65,10 @@ export interface TenantContentData {
 		description: string;
 		image?: string;
 		category?: string;
+		inStock?: boolean;
 	}>;
+	announcementBanner?: string;
+	businessHours?: string;
 	heroHeadline?: string;
 	heroSubheadline?: string;
 	benefits?: Array<{
@@ -139,6 +142,14 @@ export default function TenantLiveSite({
 			className={`min-h-screen font-sans ${
 				isDarkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"
 			}`}>
+			{/* Top Announcement Banner (Quick-Edit Studio) */}
+			{content.announcementBanner && (
+				<div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white text-xs font-bold py-2.5 px-4 text-center tracking-wide flex items-center justify-center gap-2 shadow-inner">
+					<Sparkles className="w-3.5 h-3.5 shrink-0" />
+					<span>{content.announcementBanner}</span>
+				</div>
+			)}
+
 			{/* Top Header / Navigation */}
 			<header
 				className={`sticky top-0 z-40 border-b ${
@@ -365,44 +376,54 @@ export default function TenantLiveSite({
 										</div>
 									)}
 
-									<div>
+									<div className="flex items-center gap-2">
 										<h4 className="font-extrabold text-base text-gray-900 dark:text-white">
 											{prod.name}
 										</h4>
-										{prod.category && (
-											<span className="text-[10px] font-bold text-gray-400 uppercase">
-												{prod.category}
+										{prod.inStock === false && (
+											<span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60">
+												Sold Out
 											</span>
 										)}
 									</div>
-
-									<p
-										className={`text-xs leading-relaxed ${
-											isDarkMode ? "text-slate-400" : "text-gray-600"
-										}`}>
-										{prod.description}
-									</p>
-								</div>
-
-								<div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
-									<span className="text-lg font-extrabold font-nohemi text-blue-600">
-										{prod.price}
-									</span>
-
-									{cleanWhatsApp && (
-										<a
-											href={`https://wa.me/${cleanWhatsApp}?text=${encodeURIComponent(
-												`Hello ${businessName}, I would like to order the product: "${prod.name}" priced at ${prod.price}.`,
-											)}`}
-											target="_blank"
-											rel="noreferrer"
-											style={{ backgroundColor: "#25D366" }}
-											className="px-4 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:brightness-105 transition-all">
-											<MessageCircle className="w-3.5 h-3.5 fill-white" />
-											<span>Order via WhatsApp</span>
-										</a>
+									{prod.category && (
+										<span className="text-[10px] font-bold text-gray-400 uppercase">
+											{prod.category}
+										</span>
 									)}
 								</div>
+
+								<p
+									className={`text-xs leading-relaxed ${
+										isDarkMode ? "text-slate-400" : "text-gray-600"
+									}`}>
+									{prod.description}
+								</p>
+							</div>
+
+							<div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
+								<span className="text-lg font-extrabold font-nohemi text-blue-600">
+									{prod.price}
+								</span>
+
+								{prod.inStock === false ? (
+									<span className="px-3.5 py-1.5 rounded-full text-xs font-bold text-gray-400 bg-gray-100 dark:bg-slate-800 cursor-not-allowed">
+										Out of Stock
+									</span>
+								) : cleanWhatsApp ? (
+									<a
+										href={`https://wa.me/${cleanWhatsApp}?text=${encodeURIComponent(
+											`Hello ${businessName}, I would like to order the product: "${prod.name}" priced at ${prod.price}.`,
+										)}`}
+										target="_blank"
+										rel="noreferrer"
+										style={{ backgroundColor: "#25D366" }}
+										className="px-4 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:brightness-105 transition-all">
+										<MessageCircle className="w-3.5 h-3.5 fill-white" />
+										<span>Order via WhatsApp</span>
+									</a>
+								) : null}
+							</div>
 							</div>
 						))}
 					</div>
@@ -699,6 +720,18 @@ export default function TenantLiveSite({
 										<MapPin className="w-4 h-4" />
 									</div>
 									<span>{content.locationAddress}</span>
+								</div>
+							)}
+
+							{content.businessHours && (
+								<div className="flex items-center gap-3 text-xs font-bold text-gray-700 dark:text-slate-300">
+									<div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+										<Clock className="w-4 h-4" />
+									</div>
+									<div>
+										<p className="text-[10px] text-gray-400 uppercase font-semibold">Opening Hours</p>
+										<span>{content.businessHours}</span>
+									</div>
 								</div>
 							)}
 						</div>

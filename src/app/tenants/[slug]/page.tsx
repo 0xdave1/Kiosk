@@ -9,6 +9,7 @@ import TenantLiveSite from "@/components/tenant/TenantLiveSite";
 import type { TenantContentData } from "@/components/tenant/TenantLiveSite";
 import UnderConstructionView from "@/components/tenant/UnderConstructionView";
 import SubscriptionExpiredView from "@/components/tenant/SubscriptionExpiredView";
+import TenantTracker from "@/components/tenant/TenantTracker";
 import { getCustomClientTemplate } from "@/clients_websites";
 import Link from "next/link";
 import { Globe, Sparkles } from "lucide-react";
@@ -187,6 +188,7 @@ export default async function TenantSubdomainPage({ params }: PageProps) {
 
 	return (
 		<>
+			<TenantTracker tenantSlug={tenant.slug} />
 			<link rel="icon" href={faviconUrl} />
 			<link rel="shortcut icon" href={faviconUrl} />
 			<link rel="apple-touch-icon" href={faviconUrl} />

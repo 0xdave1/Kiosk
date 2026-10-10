@@ -30,6 +30,22 @@ async function run() {
   await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS "cardExpMonth" text;`;
   await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS "cardExpYear" text;`;
 
+  console.log("Creating analytics_events table...");
+  await sql`
+    CREATE TABLE IF NOT EXISTS "analytics_events" (
+      "id" text PRIMARY KEY,
+      "tenantId" text NOT NULL REFERENCES "tenants"("id") ON DELETE CASCADE,
+      "type" text NOT NULL,
+      "visitorId" text,
+      "device" text DEFAULT 'desktop',
+      "referrer" text,
+      "path" text DEFAULT '/',
+      "createdAt" timestamp DEFAULT now() NOT NULL
+    );
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS "idx_analytics_tenant_created" ON "analytics_events" ("tenantId", "createdAt");`;
+  await sql`CREATE INDEX IF NOT EXISTS "idx_analytics_tenant_type" ON "analytics_events" ("tenantId", "type");`;
+
   const cols = await sql`
     SELECT column_name, data_type 
     FROM information_schema.columns 
