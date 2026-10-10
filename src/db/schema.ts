@@ -100,6 +100,12 @@ export const tenants = pgTable("tenants", {
 	customDomain: text("customDomain").unique(), // e.g. "bellabakery.com"
 	plan: text("plan").default("NONE").notNull(), // NONE | LANDING_PAGE | SALES_FUNNEL | E_COMMERCE
 	billingStatus: text("billingStatus").default("ACTIVE").notNull(), // ACTIVE | PENDING | GRACE_PERIOD | PAST_DUE | SUSPENDED
+	autoRenew: boolean("autoRenew").default(false).notNull(), // Whether recurring auto-renewal is active
+	recurringAuthCode: text("recurringAuthCode"), // Paystack reusable authorization_code
+	cardLast4: text("cardLast4"),
+	cardBrand: text("cardBrand"),
+	cardExpMonth: text("cardExpMonth"),
+	cardExpYear: text("cardExpYear"),
 	currentPeriodEnd: timestamp("currentPeriodEnd", { mode: "date" }),
 	gracePeriodEnd: timestamp("gracePeriodEnd", { mode: "date" }),
 	isCustomDomainVerified: boolean("isCustomDomainVerified").default(false).notNull(),
@@ -119,7 +125,7 @@ export const projects = pgTable("projects", {
 		.references(() => tenants.id, { onDelete: "cascade" }),
 	name: text("name").notNull(),
 	type: text("type").notNull(), // "Landing Page" | "Sales Funnel" | "E-commerce"
-	status: text("status").default("In Progress").notNull(), // "Draft" | "In Progress" | "In Review" | "Live" | "Published"
+	status: text("status").default("In Progress").notNull(), // "Draft" | "In Progress" | "In Review" | "Live" | "Published" | "Suspended"
 	progress: integer("progress").default(0).notNull(),
 	publishedUrl: text("publishedUrl"),
 	content: text("content"), // Serialized snapshot of submitted structured content
@@ -144,6 +150,12 @@ export const subscriptions = pgTable("subscriptions", {
 	planId: text("planId").notNull(), // "landing-page" | "sales-funnel" | "ecommerce"
 	billingCycle: text("billingCycle").notNull(), // "monthly" | "yearly"
 	status: text("status").notNull(), // "active" | "grace_period" | "past_due" | "canceled"
+	autoRenew: boolean("autoRenew").default(false).notNull(),
+	authCode: text("authCode"),
+	cardLast4: text("cardLast4"),
+	cardBrand: text("cardBrand"),
+	cardExpMonth: text("cardExpMonth"),
+	cardExpYear: text("cardExpYear"),
 	currentPeriodStart: timestamp("currentPeriodStart", { mode: "date" }).notNull(),
 	currentPeriodEnd: timestamp("currentPeriodEnd", { mode: "date" }).notNull(),
 	createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),

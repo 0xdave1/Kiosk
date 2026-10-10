@@ -21,6 +21,7 @@ import { CacheService } from "@/lib/cache/CacheService";
 import { ProjectSubject } from "@/lib/events/ProjectSubject";
 import { sendWebsiteLiveEmail } from "@/lib/email";
 import { Logger } from "@/lib/logger";
+import { synthesizeIndustryBlueprint } from "@/lib/builder/industrySynthesizer";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -34,54 +35,104 @@ export interface AutoBuildJobPayload {
 }
 
 /**
- * Normalizes content data so TenantLiveSite.tsx can consume all fields consistently.
+ * Normalizes content data so TenantLiveSite.tsx can consume all fields consistently,
+ * dynamically synthesizing tailored content matching the user's business description.
  */
 function normalizeContentForLiveSite(contentData: any, tenantSlug: string, tenantName: string) {
 	const businessName = (contentData.businessName || tenantName || "My Business").trim();
-	const tagline = (contentData.tagline || "Official Online Store & Services").trim();
-
-	// Clean contact phone & WhatsApp
+	const tagline = (contentData.tagline || "").trim();
+	const aboutText = (contentData.aboutText || "").trim();
+	const contactAddress = contentData.locationAddress || contentData.contactAddress || "";
 	const rawPhone = contentData.contactPhone || "";
 	const rawWhatsapp = contentData.whatsappLink || contentData.whatsappNumber || rawPhone;
 	const cleanWhatsappDigits = (rawWhatsapp || "").replace(/[^0-9]/g, "");
 
-	// Normalize products
-	const normalizedProducts = Array.isArray(contentData.products)
+	// Intelligently synthesize industry blueprint based on business description & keywords
+	const blueprint = synthesizeIndustryBlueprint(
+		businessName,
+		tagline,
+		aboutText,
+		contactAddress,
+		cleanWhatsappDigits,
+	);
+
+	// Check if submitted services are generic dummy data
+	const hasCustomServices =
+		Array.isArray(contentData.services) &&
+		contentData.services.length > 0 &&
+		!contentData.services.some((s: any) =>
+			(s.title || "").includes("Strategic Growth & Consulting") ||
+			(s.title || "").includes("Full-Stack Implementation"),
+		);
+
+	const services = hasCustomServices
+		? contentData.services
+		: blueprint.services;
+
+	// Check if submitted products are generic dummy data
+	const hasCustomProducts =
+		Array.isArray(contentData.products) &&
+		contentData.products.length > 0 &&
+		!contentData.products.some((p: any) =>
+			(p.name || "").includes("Signature Item") ||
+			(p.name || "").includes("Limited Edition Edition"),
+		);
+
+	const products = hasCustomProducts
 		? contentData.products.map((p: any) => ({
-				name: p.name || "Featured Product",
+				name: p.name,
 				price: typeof p.price === "number" ? `$${p.price}` : String(p.price || "$0"),
 				description: p.description || "",
 				image: p.imageUrl || p.image || "",
 				category: p.category || "General",
 				badge: p.badge || "",
 		  }))
-		: [];
+		: blueprint.products;
 
-	// Normalize services
-	const normalizedServices = Array.isArray(contentData.services)
-		? contentData.services.map((s: any) => ({
-				title: s.title || "Service",
-				description: s.description || "",
-				price: s.price || "",
-				duration: s.duration || "",
-				icon: s.icon || "",
-		  }))
-		: [];
+	// Check if testimonials are generic
+	const hasCustomTestimonials =
+		Array.isArray(contentData.testimonialsList) &&
+		contentData.testimonialsList.length > 0 &&
+		!contentData.testimonialsList.some((t: any) =>
+			(t.name || "").includes("David Kendrick") ||
+			(t.name || "").includes("Elena Rostova"),
+		);
+
+	const testimonials = hasCustomTestimonials
+		? contentData.testimonialsList
+		: blueprint.testimonials;
+
+	// Check if FAQs are generic
+	const hasCustomFaqs =
+		Array.isArray(contentData.faqs) &&
+		contentData.faqs.length > 0 &&
+		!contentData.faqs.some((f: any) =>
+			(f.question || "").includes("How quickly does our project go live?"),
+		);
+
+	const faqs = hasCustomFaqs ? contentData.faqs : blueprint.faqs;
 
 	return {
 		...contentData,
 		businessName,
-		tagline,
-		locationAddress: contentData.locationAddress || contentData.contactAddress || "",
+		tagline: tagline || blueprint.tagline,
+		category: contentData.category || blueprint.category,
+		heroHeadline: blueprint.heroHeadline,
+		heroSubheadline: blueprint.heroSubheadline,
+		aboutText: aboutText || blueprint.aboutText,
+		locationAddress: contactAddress,
 		contactPhone: rawPhone,
 		whatsappNumber: cleanWhatsappDigits,
 		whatsappLink: cleanWhatsappDigits
 			? `https://wa.me/${cleanWhatsappDigits}`
 			: contentData.whatsappLink || "",
-		products: normalizedProducts,
-		services: normalizedServices,
+		products,
+		services,
+		benefits: blueprint.benefits,
+		testimonials,
+		faqs,
 		themeMode: contentData.themeMode || "light",
-		primaryColor: contentData.primaryColor || "#004ac6",
+		primaryColor: contentData.primaryColor || blueprint.primaryColor,
 		updatedAt: new Date().toISOString(),
 	};
 }

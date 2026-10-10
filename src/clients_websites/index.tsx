@@ -25,7 +25,7 @@ export const customTemplateRegistry: Record<
 	string,
 	React.ComponentType<CustomClientTemplateProps>
 > = {
-	"victorjeremiah-2e6925": VictorJeremiahStore,
+	"demo-luxury-store": VictorJeremiahStore,
 	"maiksvisuals-b0c561": MaiksVisualsStudio,
 	"maiks-visuals": MaiksVisualsStudio,
 	"maiksvisuals": MaiksVisualsStudio,

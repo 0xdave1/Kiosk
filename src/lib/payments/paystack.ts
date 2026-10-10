@@ -36,6 +36,21 @@ export interface PaystackInitResponse {
 	};
 }
 
+export interface PaystackAuthorizationData {
+	authorization_code?: string;
+	bin?: string;
+	last4?: string;
+	exp_month?: string;
+	exp_year?: string;
+	channel?: string;
+	card_type?: string;
+	bank?: string;
+	country_code?: string;
+	brand?: string;
+	reusable?: boolean;
+	signature?: string;
+}
+
 export interface PaystackVerifyResponse {
 	status: boolean;
 	message: string;
@@ -60,6 +75,7 @@ export interface PaystackVerifyResponse {
 			customer_code: string;
 			phone?: string;
 		};
+		authorization?: PaystackAuthorizationData;
 	};
 }
 
@@ -181,21 +197,38 @@ export async function initializePaystackPayment(
 /**
  * Verifies transaction status directly with the Paystack Verification API.
  */
-export async function verifyPaystackTransaction(reference: string) {
+export async function verifyPaystackTransaction(
+	reference: string,
+): Promise<NonNullable<PaystackVerifyResponse["data"]> | null> {
 	const isDevMock = !PAYSTACK_SECRET_KEY || process.env.NODE_ENV === "test";
 
 	if (isDevMock) {
 		return {
+			id: 12345,
+			domain: "test",
 			status: "success",
 			reference,
 			amount: 5000,
 			currency: "USD",
+			gateway_response: "Successful",
+			paid_at: new Date().toISOString(),
+			created_at: new Date().toISOString(),
+			ip_address: "127.0.0.1",
 			channel: "card",
 			customer: {
+				id: 1,
 				email: "dev@kioosk.online",
 				customer_code: "CUS_dev_mock",
 			},
 			metadata: {},
+			authorization: {
+				authorization_code: "AUTH_dev_mock",
+				reusable: true,
+				last4: "4081",
+				brand: "visa",
+				exp_month: "12",
+				exp_year: "2030",
+			},
 		};
 	}
 
@@ -249,3 +282,85 @@ export const initializeFlutterwavePayment = (input: {
 		metadata: input.meta || input.metadata,
 	});
 };
+
+export interface ChargeAuthorizationInput {
+	authorization_code: string;
+	email: string;
+	amount: number; // Base currency units, e.g. 29 for $29.00
+	currency: string;
+	reference: string;
+	metadata?: Record<string, unknown>;
+}
+
+export interface ChargeAuthorizationResult {
+	success: boolean;
+	reference?: string;
+	data?: any;
+	error?: string;
+}
+
+/**
+ * Charges a recurring authorization directly via Paystack's Charge Authorization API.
+ * Used for automated monthly subscription renewal without requiring manual user interaction.
+ */
+export async function chargePaystackAuthorization(
+	input: ChargeAuthorizationInput,
+): Promise<ChargeAuthorizationResult> {
+	if (process.env.NODE_ENV === "test") {
+		return {
+			success: true,
+			reference: input.reference,
+			data: { status: "success", reference: input.reference },
+		};
+	}
+
+	if (!PAYSTACK_SECRET_KEY) {
+		console.error("[PAYSTACK_CHARGE_AUTH_ERROR] PAYSTACK_SECRET_KEY is not configured.");
+		return {
+			success: false,
+			error: "PAYSTACK_SECRET_KEY is not configured.",
+		};
+	}
+
+	try {
+		const amountInSubunit = Math.round(input.amount * 100);
+		const response = await fetch(`${PAYSTACK_BASE_URL}/transaction/charge_authorization`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+			},
+			body: JSON.stringify({
+				authorization_code: input.authorization_code,
+				email: input.email,
+				amount: amountInSubunit,
+				currency: input.currency.toUpperCase(),
+				reference: input.reference,
+				metadata: input.metadata || {},
+			}),
+		});
+
+		const result = await response.json();
+
+		if (!result.status || result.data?.status !== "success") {
+			console.warn("[PAYSTACK_CHARGE_AUTH_FAILED]", result);
+			return {
+				success: false,
+				error: result.data?.gateway_response || result.message || "Recurring card debit failed",
+			};
+		}
+
+		return {
+			success: true,
+			reference: result.data.reference,
+			data: result.data,
+		};
+	} catch (err) {
+		console.error("[PAYSTACK_CHARGE_AUTH_EXCEPTION]", err);
+		return {
+			success: false,
+			error: "Network exception during recurring payment processing",
+		};
+	}
+}
+

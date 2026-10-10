@@ -5,6 +5,7 @@
 ## Overview
 
 `kiosk` is a modern Next.js 16 web application consisting of three primary subsystems:
+
 1. **Public Marketing Application**: Modular, high-conversion marketing pages (`/`, `/about`, `/services`, `/pricing`, `/contact`, `/get-started`).
 2. **Authenticated Client Dashboard**: Single-page app workspace (`/dashboard`, `/dashboard/projects`, `/dashboard/projects/new`, `/dashboard/content`, `/dashboard/templates`, `/dashboard/billing`, `/dashboard/settings`).
 3. **Website Content Studio & Live Preview Engine**: Real-time multi-tier website builder supporting live dual-theme previews (Desktop & authentic Mobile viewports).
@@ -54,6 +55,7 @@
 ## Subsystems & Data Flow
 
 ### 1. Public Marketing Subsystem
+
 - **Routing & Layout**: Global `layout.tsx` wraps pages with `NavbarWrapper` to conditionally render `Navbar` and `StaggeredMenu`.
 - **Dedicated Services Page (`/services`)**:
   - **Hero Section**: Architectural grid lines, minimal technical crosshairs (`+`), and an interactive `<LottiePlayer />` canvas supporting live tab switching between *Sales Funnel*, *Landing Page*, and *E-Commerce*.
@@ -67,6 +69,7 @@
 - **User Onboarding Flow**: Users click "Get Started" to reach `/get-started`. On form submission, a loading spinner is triggered, followed by client-side navigation to `/dashboard`.
 
 ### 2. Client Dashboard & Project Management Subsystem
+
 - **Layout & Navigation**: `/dashboard/layout.tsx` enforces light mode styling (`bg-[#f8fafc]`) and renders the persistent floating bottom `<Dock />` component wrapper (`Sidebar.tsx`).
 - **Header Profile State**: `page.tsx` renders dynamic greetings based on client local time (`00:00-11:59` Morning, `12:00-16:59` Afternoon, `17:00-23:59` Evening), notification icon trigger, and profile dropdown menu (*Account Settings*, *Billing & Plan*, *Log Out*).
 - **Projects Management**: Click any project card on `/dashboard` or `/dashboard/projects` to directly load `/dashboard/content?projectId=<id>` and resume editing.
@@ -74,6 +77,7 @@
 - **Session Protection**: 6-hour session token duration with automatic logout suspension while actively on `/checkout` (`isCheckoutInProgress`).
 
 ### 3. Website Content Studio & Live Interactive Preview Subsystem
+
 - **Content Studio (`/dashboard/content`)**: 4-step comprehensive intake form:
   1. *Business & Brand*: Business name, plan selection, logo image, hero banner upload.
   2. *Design & Typography*: Selected Google Font injection (`Playfair`, `Inter`, `Outfit`, `Montserrat`, etc.), Light Mode vs Midnight Dark Mode preference.
@@ -86,6 +90,7 @@
   - **Live Lead Capture**: Interactive consultation form with simulated submission state.
 
 ### 4. Dynamic Multi-Tenant Subdomains & Brand Isolation Subsystem
+
 - **Subdomain Routing & Edge Rewrites**: Edge middleware rewrites `<tenant>.kioosk.online` to `/tenants/[slug]` and `<customdomain.com>` to `/domains/[domain]`.
 - **Client Favicon Isolation**: Client sites resolve their favicon dynamically to the tenant's uploaded logo or an auto-generated business monogram SVG, guaranteeing zero Kiosk platform branding on client web domains.
 - **Client Branded Preloader**: Live tenant site initial loads feature the client's logo instead of the Kiosk logo.

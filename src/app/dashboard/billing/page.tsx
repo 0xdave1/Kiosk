@@ -21,6 +21,7 @@ import {
 	Loader2,
 	Receipt,
 	ArrowRight,
+	RefreshCw,
 } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
@@ -98,6 +99,12 @@ export function BillingPageContent() {
 	const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 	const [tenantPlan, setTenantPlan] = useState<string>("NONE");
 	const [billingStatus, setBillingStatus] = useState<string>("ACTIVE");
+	const [autoRenew, setAutoRenew] = useState<boolean>(false);
+	const [cardLast4, setCardLast4] = useState<string | null>(null);
+	const [cardBrand, setCardBrand] = useState<string | null>(null);
+	const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null);
+	const [isTogglingAutoRenew, setIsTogglingAutoRenew] = useState<boolean>(false);
+	const [autoRenewMessage, setAutoRenewMessage] = useState<string | null>(null);
 	const [pendingInvoice, setPendingInvoice] = useState<DBInvoice | null>(null);
 	const [invoicesList, setInvoicesList] = useState<DBInvoice[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -121,6 +128,10 @@ export function BillingPageContent() {
 					if (data.tenant) {
 						setTenantPlan(data.tenant.plan || "NONE");
 						setBillingStatus(data.tenant.billingStatus || "ACTIVE");
+						setAutoRenew(Boolean(data.tenant.autoRenew));
+						setCardLast4(data.tenant.cardLast4 || null);
+						setCardBrand(data.tenant.cardBrand || null);
+						setCurrentPeriodEnd(data.tenant.currentPeriodEnd || null);
 					}
 					setPendingInvoice(data.pendingInvoice || null);
 					setInvoicesList(data.invoices || []);
@@ -133,6 +144,29 @@ export function BillingPageContent() {
 		}
 		fetchBillingInfo();
 	}, []);
+
+	const handleToggleAutoRenew = async () => {
+		setIsTogglingAutoRenew(true);
+		setAutoRenewMessage(null);
+		try {
+			const res = await fetch("/api/billing/autorenew", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ enabled: !autoRenew }),
+			});
+			const data = await res.json();
+			if (res.ok) {
+				setAutoRenew(data.autoRenew);
+				setAutoRenewMessage(data.message);
+			} else {
+				alert(data.error || "Failed to update recurring payment settings");
+			}
+		} catch (err) {
+			alert("Network error updating recurring payment settings");
+		} finally {
+			setIsTogglingAutoRenew(false);
+		}
+	};
 
 	const getCurrentPlanTitle = () => {
 		const p = (tenantPlan || "").toUpperCase();
@@ -345,6 +379,88 @@ export function BillingPageContent() {
 						</button>
 					</div>
 				</div>
+
+				{/* RECURRING PAYMENT / AUTO-RENEWAL STATUS CARD */}
+				{isPaid && (
+					<div
+						className={`mb-10 p-6 sm:p-7 rounded-2xl border transition-all ${
+							autoRenew
+								? "bg-slate-900 border-slate-800 text-white shadow-md"
+								: "bg-amber-50/70 border-amber-200 text-amber-950 shadow-xs"
+						}`}>
+						<div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+							<div className="space-y-2">
+								<div className="flex items-center gap-2">
+									{autoRenew ? (
+										<span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+											<CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+											Auto-Renewal Active
+										</span>
+									) : (
+										<span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 border border-amber-500/30">
+											<AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+											Recurring Payment Not Set — Plan Will Terminate
+										</span>
+									)}
+								</div>
+
+								<h3 className="text-lg font-bold">
+									{autoRenew
+										? `Recurring Card Debit (${(cardBrand || "Card").toUpperCase()} •••• ${cardLast4 || "••••"})`
+										: "No Recurring Payment Configured"}
+								</h3>
+
+								<p className="text-xs opacity-90 max-w-xl leading-relaxed">
+									{autoRenew
+										? `Your monthly hosting subscription will automatically renew at the end of the 1-month period${
+												currentPeriodEnd ? ` on ${new Date(currentPeriodEnd).toLocaleDateString()}` : ""
+										  }. You will receive an email receipt upon successful renewal.`
+										: `Warning: If recurring payment is not configured, your subscription will be automatically terminated at the end of your 1-month period${
+												currentPeriodEnd ? ` (${new Date(currentPeriodEnd).toLocaleDateString()})` : ""
+										  } and your live website will be paused.`}
+								</p>
+
+								{autoRenewMessage && (
+									<p className="text-xs font-semibold text-blue-400 pt-1">
+										{autoRenewMessage}
+									</p>
+								)}
+							</div>
+
+							<div className="shrink-0 flex items-center gap-3">
+								{cardLast4 ? (
+									<button
+										type="button"
+										onClick={handleToggleAutoRenew}
+										disabled={isTogglingAutoRenew}
+										className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+											autoRenew
+												? "bg-white/10 hover:bg-white/20 text-white border border-white/20"
+												: "bg-emerald-600 hover:bg-emerald-700 text-white"
+										}`}>
+										{isTogglingAutoRenew && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+										<span>{autoRenew ? "Cancel Recurring Renewal" : "Re-Enable Auto-Renewal"}</span>
+									</button>
+								) : (
+									pendingInvoice?.paymentLink ? (
+										<a
+											href={pendingInvoice.paymentLink}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="px-5 py-2.5 rounded-full text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition-all shadow-xs flex items-center gap-2">
+											<CreditCard className="w-3.5 h-3.5" />
+											<span>Pay & Enable Auto-Debit</span>
+										</a>
+									) : (
+										<div className="text-xs text-amber-800 font-medium">
+											Pay with Card on next renewal to enable auto-debit
+										</div>
+									)
+								)}
+							</div>
+						</div>
+					</div>
+				)}
 
 				{/* Available Upgrade Plans Grid */}
 				<div className="mb-12">

@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import TenantLiveSite from "@/components/tenant/TenantLiveSite";
 import type { TenantContentData } from "@/components/tenant/TenantLiveSite";
 import UnderConstructionView from "@/components/tenant/UnderConstructionView";
+import SubscriptionExpiredView from "@/components/tenant/SubscriptionExpiredView";
 import { getCustomClientTemplate } from "@/clients_websites";
 import Link from "next/link";
 import { Globe, Sparkles } from "lucide-react";
@@ -107,14 +108,40 @@ export default async function CustomDomainPage({ params }: PageProps) {
 		} catch (e) {}
 	}
 
+	const businessName = parsedContent.businessName || tenant.name || cleanDomain;
+	const faviconUrl =
+		parsedContent.logoImage?.url ||
+		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23004ac6'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
+
+	// Check if plan has been terminated or suspended at the end of the subscription period
+	const isPlanTerminated =
+		tenant.plan === "NONE" ||
+		tenant.billingStatus === "SUSPENDED" ||
+		project?.status === "Suspended" ||
+		(tenant.currentPeriodEnd && new Date() > new Date(tenant.currentPeriodEnd) && tenant.billingStatus === "PAST_DUE");
+
+	if (isPlanTerminated) {
+		return (
+			<>
+				<link rel="icon" href={faviconUrl} />
+				<link rel="shortcut icon" href={faviconUrl} />
+				<link rel="apple-touch-icon" href={faviconUrl} />
+				{parsedContent.logoImage?.url && <meta name="client-logo" content={parsedContent.logoImage.url} />}
+				<meta name="client-business-name" content={businessName} />
+				<SubscriptionExpiredView
+					businessName={businessName}
+					logoUrl={parsedContent.logoImage?.url}
+					tenantSlug={tenant.slug}
+					whatsapp={parsedContent.whatsappNumber || parsedContent.whatsappLink}
+					contactEmail={parsedContent.contactEmail}
+				/>
+			</>
+		);
+	}
+
 	const isLive = project?.status === "Live" || project?.status === "Published";
 
 	if (!isLive) {
-		const businessName = parsedContent.businessName || tenant.name || cleanDomain;
-		const faviconUrl =
-			parsedContent.logoImage?.url ||
-			`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23004ac6'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
-
 		return (
 			<>
 				<link rel="icon" href={faviconUrl} />
@@ -137,15 +164,9 @@ export default async function CustomDomainPage({ params }: PageProps) {
 	}
 
 	const publishedUrl = `https://${cleanDomain}`;
-
 	const clientLogo = parsedContent.logoImage?.url || "";
-	const businessName = parsedContent.businessName || tenant.name || cleanDomain;
 	const CustomComponent =
 		getCustomClientTemplate(cleanDomain) || getCustomClientTemplate(tenant.slug);
-
-	const faviconUrl =
-		clientLogo ||
-		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23004ac6'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
 
 	return (
 		<>

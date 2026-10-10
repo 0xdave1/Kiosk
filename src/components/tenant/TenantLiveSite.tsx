@@ -66,6 +66,22 @@ export interface TenantContentData {
 		image?: string;
 		category?: string;
 	}>;
+	heroHeadline?: string;
+	heroSubheadline?: string;
+	benefits?: Array<{
+		title: string;
+		description: string;
+	}>;
+	testimonials?: Array<{
+		name: string;
+		role: string;
+		review: string;
+		rating?: number;
+	}>;
+	faqs?: Array<{
+		question: string;
+		answer: string;
+	}>;
 }
 
 interface TenantLiveSiteProps {
@@ -218,14 +234,14 @@ export default function TenantLiveSite({
 						</div>
 
 						<h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-							{tagline}
+							{content.heroHeadline || tagline}
 						</h2>
 
 						<p
 							className={`text-sm sm:text-base leading-relaxed ${
 								isDarkMode ? "text-slate-300" : "text-gray-600"
 							}`}>
-							{content.aboutText ||
+							{content.heroSubheadline || content.aboutText ||
 								`Welcome to ${businessName}. We take pride in delivering top-tier solutions, premium products, and exceptional customer service.`}
 						</p>
 
@@ -323,9 +339,9 @@ export default function TenantLiveSite({
 					</p>
 				</div>
 
-				{/* Render E-Commerce Products */}
-				{plan === "ECOMMERCE_STORE" && content.products && content.products.length > 0 && (
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+				{/* Render Products / Offerings */}
+				{content.products && content.products.length > 0 && (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
 						{content.products.map((prod, idx) => (
 							<div
 								key={idx}
@@ -517,6 +533,118 @@ export default function TenantLiveSite({
 					</div>
 				)}
 			</section>
+
+			{/* Benefits / Why Us Section */}
+			{content.benefits && content.benefits.length > 0 && (
+				<section className="py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+					<div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
+						<span
+							style={{ color: brandColor }}
+							className="text-xs font-extrabold uppercase tracking-wider">
+							Why Choose Us
+						</span>
+						<h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+							The {businessName} Advantage
+						</h3>
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+						{content.benefits.map((b, idx) => (
+							<div
+								key={idx}
+								className={`p-6 rounded-2xl border ${
+									isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-gray-200"
+								} shadow-xs`}>
+								<div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+									<CheckCircle2 className="w-5 h-5" />
+								</div>
+								<h4 className="font-extrabold text-base mb-2">{b.title}</h4>
+								<p
+									className={`text-xs leading-relaxed ${
+										isDarkMode ? "text-slate-400" : "text-gray-600"
+									}`}>
+									{b.description}
+								</p>
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+
+			{/* Testimonials / Buyer Reviews Section */}
+			{content.testimonials && content.testimonials.length > 0 && (
+				<section className="py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+					<div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
+						<span
+							style={{ color: brandColor }}
+							className="text-xs font-extrabold uppercase tracking-wider">
+							Verified Reviews
+						</span>
+						<h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+							Trusted by Customers
+						</h3>
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+						{content.testimonials.map((t, idx) => (
+							<div
+								key={idx}
+								className={`p-6 rounded-3xl border ${
+									isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-gray-200"
+								} shadow-xs flex flex-col justify-between`}>
+								<div className="space-y-3">
+									<div className="flex items-center gap-1 text-amber-500">
+										{[...Array(t.rating || 5)].map((_, i) => (
+											<Star key={i} className="w-4 h-4 fill-amber-400" />
+										))}
+									</div>
+									<p
+										className={`text-xs italic leading-relaxed ${
+											isDarkMode ? "text-slate-300" : "text-gray-600"
+										}`}>
+										&ldquo;{t.review}&rdquo;
+									</p>
+								</div>
+								<div className="pt-4 border-t border-gray-100 dark:border-slate-800 mt-4">
+									<h5 className="font-extrabold text-xs">{t.name}</h5>
+									<span className="text-[10px] text-gray-400 font-semibold">{t.role}</span>
+								</div>
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+
+			{/* FAQs Section */}
+			{content.faqs && content.faqs.length > 0 && (
+				<section className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+					<div className="text-center mb-10 space-y-2">
+						<span
+							style={{ color: brandColor }}
+							className="text-xs font-extrabold uppercase tracking-wider">
+							Got Questions?
+						</span>
+						<h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+							Frequently Asked Questions
+						</h3>
+					</div>
+					<div className="space-y-4">
+						{content.faqs.map((f, idx) => (
+							<div
+								key={idx}
+								className={`p-5 rounded-2xl border ${
+									isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-gray-200"
+								}`}>
+								<h4 className="font-extrabold text-sm mb-2">{f.question}</h4>
+								<p
+									className={`text-xs leading-relaxed ${
+										isDarkMode ? "text-slate-400" : "text-gray-600"
+									}`}>
+									{f.answer}
+								</p>
+							</div>
+						))}
+					</div>
+				</section>
+			)}
 
 			{/* Contact & Inquiry Section */}
 			<section id="contact" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">

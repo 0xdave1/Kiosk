@@ -46,6 +46,20 @@ interface PaystackWebhookEvent {
 		amount?: number;
 		currency?: string;
 		channel?: string;
+		authorization?: {
+			authorization_code?: string;
+			bin?: string;
+			last4?: string;
+			exp_month?: string;
+			exp_year?: string;
+			channel?: string;
+			card_type?: string;
+			bank?: string;
+			country_code?: string;
+			brand?: string;
+			reusable?: boolean;
+			signature?: string;
+		};
 		customer?: {
 			id?: string | number;
 			customer_code?: string;
@@ -166,11 +180,20 @@ export async function POST(request: Request) {
 			}
 
 			if (tenant) {
+				const auth = data.authorization || verifiedTx?.authorization;
+				const isReusable = Boolean(auth?.reusable && auth?.authorization_code);
+
 				await db
 					.update(tenants)
 					.set({
 						plan,
 						billingStatus: "ACTIVE",
+						autoRenew: isReusable,
+						recurringAuthCode: isReusable ? auth?.authorization_code : null,
+						cardLast4: auth?.last4 || null,
+						cardBrand: auth?.brand || auth?.card_type || null,
+						cardExpMonth: auth?.exp_month || null,
+						cardExpYear: auth?.exp_year || null,
 						currentPeriodEnd: newPeriodEnd,
 						gracePeriodEnd: newGraceEnd,
 						updatedAt: now,
@@ -192,13 +215,35 @@ export async function POST(request: Request) {
 						planId: plan.toLowerCase().replace(/_/g, "-"),
 						billingCycle,
 						status: "active",
+						autoRenew: isReusable,
+						authCode: isReusable ? auth?.authorization_code : null,
+						cardLast4: auth?.last4 || null,
+						cardBrand: auth?.brand || auth?.card_type || null,
+						cardExpMonth: auth?.exp_month || null,
+						cardExpYear: auth?.exp_year || null,
 						currentPeriodStart: now,
 						currentPeriodEnd: newPeriodEnd,
 					});
+				} else {
+					await db
+						.update(subscriptions)
+						.set({
+							status: "active",
+							autoRenew: isReusable,
+							authCode: isReusable ? auth?.authorization_code : null,
+							cardLast4: auth?.last4 || null,
+							cardBrand: auth?.brand || auth?.card_type || null,
+							cardExpMonth: auth?.exp_month || null,
+							cardExpYear: auth?.exp_year || null,
+							currentPeriodStart: now,
+							currentPeriodEnd: newPeriodEnd,
+							updatedAt: now,
+						})
+						.where(eq(subscriptions.id, existingSub.id));
 				}
 
 				console.log(
-					`[PAYSTACK_WEBHOOK_SUCCESS] Reconciled invoice payment for tenant ${tenant.id} (${plan}, ${paymentMethod}) via ref ${reference}`,
+					`[PAYSTACK_WEBHOOK_SUCCESS] Reconciled invoice payment for tenant ${tenant.id} (${plan}, ${paymentMethod}, recurring=${isReusable}) via ref ${reference}`,
 				);
 
 				// 3. Dispatch Async PDF Receipt Email Job
@@ -232,10 +277,20 @@ export async function POST(request: Request) {
 			const subId = `paystack_${reference}`;
 			await db
 				.update(subscriptions)
-				.set({ status: "canceled", updatedAt: new Date() })
+				.set({ status: "canceled", autoRenew: false, updatedAt: new Date() })
 				.where(eq(subscriptions.subscriptionId, subId));
 
-			console.log(`[PAYSTACK_WEBHOOK_CANCELED] Subscription ${subId} marked as canceled`);
+			const sub = await db.query.subscriptions.findFirst({
+				where: eq(subscriptions.subscriptionId, subId),
+			});
+			if (sub) {
+				await db
+					.update(tenants)
+					.set({ autoRenew: false, recurringAuthCode: null, updatedAt: new Date() })
+					.where(eq(tenants.id, sub.tenantId));
+			}
+
+			console.log(`[PAYSTACK_WEBHOOK_CANCELED] Subscription ${subId} marked as canceled and autoRenew disabled`);
 		}
 
 		return NextResponse.json({ status: "success" }, { status: 200 });

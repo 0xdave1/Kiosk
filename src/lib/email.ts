@@ -607,3 +607,188 @@ export async function sendSupportTicketEmail(payload: SupportTicketPayload) {
 		html: clientHtml,
 	});
 }
+
+/**
+ * 11. Recurring Payment Success Email
+ */
+export async function sendRecurringPaymentSuccessEmail({
+	toEmail,
+	userName,
+	plan,
+	amount,
+	currency,
+	cardLast4,
+	nextBillingDate,
+}: {
+	toEmail: string;
+	userName: string;
+	plan: string;
+	amount: number;
+	currency: string;
+	cardLast4?: string;
+	nextBillingDate: string;
+}) {
+	const subject = `Subscription Renewed: Your ${plan} Website is Active`;
+	const contentHtml = `
+		<p style="margin: 0 0 16px 0;">Hi ${userName},</p>
+		<p style="margin: 0 0 16px 0;">
+			Your recurring subscription for your <strong>${plan}</strong> website has automatically renewed successfully.
+		</p>
+		<div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+			<p style="margin: 0 0 6px 0; font-size: 14px; color: #166534;"><strong>Amount Billed:</strong> ${currency} ${amount}.00</p>
+			${cardLast4 ? `<p style="margin: 0 0 6px 0; font-size: 14px; color: #166534;"><strong>Payment Card:</strong> •••• ${cardLast4}</p>` : ""}
+			<p style="margin: 0; font-size: 14px; color: #166534;"><strong>Next Renewal Date:</strong> ${nextBillingDate}</p>
+		</div>
+		<p style="margin: 0 0 16px 0;">
+			Your live website and custom domain remain online with zero downtime. You can view your invoice history and manage your billing settings anytime from your dashboard.
+		</p>
+		<p style="margin: 0 0 16px 0;">
+			👉 <a href="${getAppUrl()}/dashboard/billing" style="color: #004ac6; font-weight: 700; text-decoration: underline;">View Billing Dashboard</a>
+		</p>
+	`;
+
+	const html = renderEmailShell({
+		title: "Subscription Renewed",
+		contentHtml,
+	});
+
+	return sendEmail({ to: toEmail, subject, html });
+}
+
+/**
+ * 12. Recurring Payment Failed Warning Email
+ */
+export async function sendRecurringPaymentFailedEmail({
+	toEmail,
+	userName,
+	plan,
+	amount,
+	currency,
+	cardLast4,
+	paymentLink,
+	dueDate,
+}: {
+	toEmail: string;
+	userName: string;
+	plan: string;
+	amount: number;
+	currency: string;
+	cardLast4?: string;
+	paymentLink: string;
+	dueDate: string;
+}) {
+	const subject = `Urgent: Recurring Payment Failed for Your ${plan} Website`;
+	const contentHtml = `
+		<p style="margin: 0 0 16px 0;">Hi ${userName},</p>
+		<p style="margin: 0 0 16px 0;">
+			We attempted to renew your <strong>${plan}</strong> website subscription (${currency} ${amount}.00)${cardLast4 ? ` using your card ending in •••• ${cardLast4}` : ""}, but the charge could not be completed.
+		</p>
+		<div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+			<p style="margin: 0; font-size: 14px; color: #92400e;">
+				<strong>Notice:</strong> If payment is not completed or recurring billing updated before <strong>${dueDate}</strong>, your plan will be terminated and your live website will be paused.
+			</p>
+		</div>
+		<p style="margin: 0 0 16px 0;">
+			Please update your payment method or pay the renewal invoice immediately using the link below:
+		</p>
+		<p style="margin: 0 0 20px 0;">
+			👉 <a href="${paymentLink}" style="color: #004ac6; font-weight: 700; text-decoration: underline;">Pay Renewal & Update Payment Method</a>
+		</p>
+	`;
+
+	const html = renderEmailShell({
+		title: "Recurring Payment Failed",
+		contentHtml,
+	});
+
+	return sendEmail({ to: toEmail, subject, html });
+}
+
+/**
+ * 13. Plan Terminated Notice Email
+ */
+export async function sendPlanTerminatedNoticeEmail({
+	toEmail,
+	userName,
+	plan,
+	reactivationLink,
+}: {
+	toEmail: string;
+	userName: string;
+	plan: string;
+	reactivationLink: string;
+}) {
+	const subject = `Your Kiosk Subscription Plan Has Been Terminated: ${plan}`;
+	const contentHtml = `
+		<p style="margin: 0 0 16px 0;">Hi ${userName},</p>
+		<p style="margin: 0 0 16px 0;">
+			Your 1-month subscription period for your <strong>${plan}</strong> website has ended and no active recurring payment was received. As a result, your subscription plan has been terminated and your live website is temporarily paused.
+		</p>
+		<div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+			<p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b;">
+				<strong>Website Status:</strong> Paused / Subscription Inactive
+			</p>
+			<p style="margin: 0; font-size: 13px; color: #b91c1c;">
+				Your website content, domain settings, images, and data remain securely stored. Nothing has been deleted.
+			</p>
+		</div>
+		<p style="margin: 0 0 16px 0;">
+			To instantly reactivate your website and restore live visitors, please log in and restart your subscription:
+		</p>
+		<p style="margin: 0 0 24px 0;">
+			👉 <a href="${reactivationLink}" style="color: #004ac6; font-weight: 700; text-decoration: underline;">Reactivate Your Plan Now</a> (${reactivationLink})
+		</p>
+		<p style="margin: 0; font-size: 13px; color: #6b7280;">
+			If you have any questions or require assistance, reply directly to this email and our team will help you.
+		</p>
+	`;
+
+	const html = renderEmailShell({
+		title: "Subscription Plan Terminated",
+		contentHtml,
+	});
+
+	return sendEmail({ to: toEmail, subject, html });
+}
+
+/**
+ * 14. Recurring Payment Setup Reminder Email (Sent prior to 1-month period end)
+ */
+export async function sendRecurringSetupReminderEmail({
+	toEmail,
+	userName,
+	plan,
+	expiryDate,
+	paymentLink,
+}: {
+	toEmail: string;
+	userName: string;
+	plan: string;
+	expiryDate: string;
+	paymentLink: string;
+}) {
+	const subject = `Action Required: Your ${plan} 1-Month Subscription Expires on ${expiryDate}`;
+	const contentHtml = `
+		<p style="margin: 0 0 16px 0;">Hi ${userName},</p>
+		<p style="margin: 0 0 16px 0;">
+			Your 1-month subscription for your <strong>${plan}</strong> website will expire on <strong>${expiryDate}</strong>.
+		</p>
+		<div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+			<p style="margin: 0; font-size: 14px; color: #92400e;">
+				<strong>Notice:</strong> Automatic recurring payment is currently <strong>not set</strong> on your account. To prevent your website plan from terminating at the end of the period, please ensure payment is completed or set up recurring card billing.
+			</p>
+		</div>
+		<p style="margin: 0 0 16px 0;">
+			👉 Renew & Enable Recurring Payment:<br/>
+			<a href="${paymentLink}" style="color: #004ac6; font-weight: 700; text-decoration: underline;">${paymentLink}</a>
+		</p>
+	`;
+
+	const html = renderEmailShell({
+		title: "Subscription Renewal Notice",
+		contentHtml,
+	});
+
+	return sendEmail({ to: toEmail, subject, html });
+}
+
