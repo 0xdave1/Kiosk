@@ -14,12 +14,11 @@
 import { db } from "@/db";
 import { tenants, users, invoices, subscriptions, projects } from "@/db/schema";
 import { eq, and, lte, gt, or, inArray } from "drizzle-orm";
-import { initializeBachsPayment } from "@/lib/payments/bachs";
+import { initializeBachsPayment, getBachsProductId } from "@/lib/payments/bachs";
 import { BASE_PRICES_USD, PlanKey } from "@/lib/currency";
 import {
 	sendPaymentRequestEmail,
 	sendGracePeriodReminderEmail,
-	sendSiteFlaggedNoticeEmail,
 	sendPlanTerminatedNoticeEmail,
 	sendRecurringSetupReminderEmail,
 } from "@/lib/email";
@@ -78,7 +77,9 @@ export async function processScheduledBillingJob() {
 			const graceEnd = tenant.gracePeriodEnd || new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
 			// Generate renewal invoice payment link via Bachs
+			const productId = getBachsProductId(tenant.plan, billingCycle);
 			const paymentResult = await initializeBachsPayment({
+				productId,
 				amount,
 				currency,
 				email: owner.email,
@@ -92,6 +93,7 @@ export async function processScheduledBillingJob() {
 					plan: tenant.plan,
 					billingCycle,
 					type: "RECURRING_HOSTING",
+					productId,
 				},
 			});
 
@@ -177,7 +179,9 @@ export async function processScheduledBillingJob() {
 			const dueDate = tenant.currentPeriodEnd || now;
 			const gracePeriodEnd = new Date(dueDate.getTime() + 7 * 24 * 60 * 60 * 1000);
 
+			const productId = getBachsProductId(tenant.plan, billingCycle);
 			const paymentResult = await initializeBachsPayment({
+				productId,
 				amount,
 				currency,
 				email: owner.email,
@@ -191,6 +195,7 @@ export async function processScheduledBillingJob() {
 					plan: tenant.plan,
 					billingCycle,
 					type: "RECURRING_HOSTING",
+					productId,
 				},
 			});
 

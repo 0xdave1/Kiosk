@@ -37,8 +37,71 @@ export const CURRENCIES: Record<string, CurrencyConfig> = {
 		code: "NGN",
 		symbol: "₦",
 		locale: "en-NG",
-		rateFromUSD: 1620,
+		rateFromUSD: 777600 / 583.99, // ~1331.53 NGN/USD
 		label: "Nigerian Naira",
+	},
+	GHS: {
+		code: "GHS",
+		symbol: "GH₵",
+		locale: "en-GH",
+		rateFromUSD: 6824.19 / 583.99, // ~11.685 GHS/USD
+		label: "Ghanaian Cedi",
+	},
+	KES: {
+		code: "KES",
+		symbol: "KSh",
+		locale: "en-KE",
+		rateFromUSD: 75884 / 583.99, // ~129.94 KES/USD
+		label: "Kenyan Shilling",
+	},
+	MWK: {
+		code: "MWK",
+		symbol: "MK",
+		locale: "en-MW",
+		rateFromUSD: 1013337 / 583.99, // ~1735.20 MWK/USD
+		label: "Malawian Kwacha",
+	},
+	RWF: {
+		code: "RWF",
+		symbol: "FRw",
+		locale: "rw-RW",
+		rateFromUSD: 862537 / 583.99, // ~1476.97 RWF/USD
+		label: "Rwandan Franc",
+	},
+	TZS: {
+		code: "TZS",
+		symbol: "TSh",
+		locale: "sw-TZ",
+		rateFromUSD: 1542805 / 583.99, // ~2641.83 TZS/USD
+		label: "Tanzanian Shilling",
+	},
+	UGX: {
+		code: "UGX",
+		symbol: "USh",
+		locale: "en-UG",
+		rateFromUSD: 2413709 / 583.99, // ~4133.13 UGX/USD
+		label: "Ugandan Shilling",
+	},
+	XAF: {
+		code: "XAF",
+		symbol: "FCFA",
+		locale: "fr-CM",
+		rateFromUSD: 340490 / 583.99, // ~583.04 XAF/USD
+		label: "Central African CFA Franc",
+	},
+	XOF: {
+		code: "XOF",
+		symbol: "CFA",
+		locale: "fr-SN",
+		rateFromUSD: 340490 / 583.99, // ~583.04 XOF/USD
+		label: "West African CFA Franc",
+	},
+	ZMW: {
+		code: "ZMW",
+		symbol: "ZK",
+		locale: "en-ZM",
+		rateFromUSD: 11699 / 583.99, // ~20.03 ZMW/USD
+		label: "Zambian Kwacha",
 	},
 	GBP: {
 		code: "GBP",
@@ -68,20 +131,6 @@ export const CURRENCIES: Record<string, CurrencyConfig> = {
 		rateFromUSD: 1.54,
 		label: "Australian Dollar",
 	},
-	GHS: {
-		code: "GHS",
-		symbol: "₵",
-		locale: "en-GH",
-		rateFromUSD: 15.5,
-		label: "Ghanaian Cedi",
-	},
-	KES: {
-		code: "KES",
-		symbol: "KSh",
-		locale: "en-KE",
-		rateFromUSD: 129,
-		label: "Kenyan Shilling",
-	},
 	ZAR: {
 		code: "ZAR",
 		symbol: "R",
@@ -98,6 +147,38 @@ export const CURRENCIES: Record<string, CurrencyConfig> = {
 export const COUNTRY_TO_CURRENCY: Record<string, string> = {
 	// Nigeria
 	NG: "NGN",
+	// Ghana
+	GH: "GHS",
+	// Kenya
+	KE: "KES",
+	// Malawi
+	MW: "MWK",
+	// Rwanda
+	RW: "RWF",
+	// Tanzania
+	TZ: "TZS",
+	// Uganda
+	UG: "UGX",
+	// Zambia
+	ZM: "ZMW",
+	// Central Africa (CEMAC - XAF)
+	CM: "XAF",
+	GA: "XAF",
+	CG: "XAF",
+	TD: "XAF",
+	CF: "XAF",
+	GQ: "XAF",
+	// West Africa (WAEMU - XOF)
+	SN: "XOF",
+	CI: "XOF",
+	BJ: "XOF",
+	BF: "XOF",
+	ML: "XOF",
+	NE: "XOF",
+	TG: "XOF",
+	GW: "XOF",
+	// South Africa
+	ZA: "ZAR",
 	// United Kingdom
 	GB: "GBP",
 	// Eurozone countries
@@ -125,12 +206,6 @@ export const COUNTRY_TO_CURRENCY: Record<string, string> = {
 	// Australia / New Zealand
 	AU: "AUD",
 	NZ: "AUD",
-	// Ghana
-	GH: "GHS",
-	// Kenya
-	KE: "KES",
-	// South Africa
-	ZA: "ZAR",
 };
 
 /**

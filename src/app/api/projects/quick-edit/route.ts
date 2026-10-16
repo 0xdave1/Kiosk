@@ -29,11 +29,11 @@ export async function GET() {
 			return NextResponse.json({ error: "No project found for workspace" }, { status: 404 });
 		}
 
-		let parsedContent: Record<string, any> = {};
+		let parsedContent: Record<string, unknown> = {};
 		if (project.content) {
 			try {
 				parsedContent = JSON.parse(project.content);
-			} catch (e) {
+			} catch {
 				parsedContent = {};
 			}
 		}
@@ -73,11 +73,11 @@ export async function PATCH(request: Request) {
 			return NextResponse.json({ error: "Project not found" }, { status: 404 });
 		}
 
-		let currentContent: Record<string, any> = {};
+		let currentContent: Record<string, unknown> = {};
 		if (project.content) {
 			try {
 				currentContent = JSON.parse(project.content);
-			} catch (e) {
+			} catch {
 				currentContent = {};
 			}
 		}

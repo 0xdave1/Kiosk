@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { initializeBachsPayment } from "../../src/lib/payments/bachs";
+import { initializeBachsPayment, getBachsProductId } from "../../src/lib/payments/bachs";
 import { BASE_PRICES_USD, CURRENCIES, formatPrice, getCurrencyForCountry } from "../../src/lib/currency";
 
 test.describe("Payments & Currency Architecture", () => {
@@ -26,6 +26,15 @@ test.describe("Payments & Currency Architecture", () => {
 
 		const gbCurrency = getCurrencyForCountry("GB");
 		expect(gbCurrency.code).toBe("GBP");
+	});
+
+	test("Bachs Products - Maps plan and billing cycle to registered catalog products", () => {
+		expect(getBachsProductId("LANDING_PAGE", "monthly")).toBe("prod_5223f9a13c2541eeabef");
+		expect(getBachsProductId("LANDING_PAGE", "yearly")).toBe("prod_63eade98b47b48a99151");
+		expect(getBachsProductId("SALES_FUNNEL", "monthly")).toBe("prod_222cc418fa6f4e8faf96");
+		expect(getBachsProductId("SALES_FUNNEL", "yearly")).toBe("prod_0d0bec9066714f81a923");
+		expect(getBachsProductId("E_COMMERCE", "monthly")).toBe("prod_ca6d57ac86e8495899eb");
+		expect(getBachsProductId("E_COMMERCE", "yearly")).toBe("prod_47fe5e13ee9345bbb768");
 	});
 
 	test("initializeBachsPayment - Gracefully initialises dev/mock fallback link", async () => {

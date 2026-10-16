@@ -12,7 +12,7 @@ export * from "./auth/session";
 export * from "./cache/CacheService";
 export * from "./events/ProjectSubject";
 export * from "./factory/SiteTemplateFactory";
-export { initializeBachsPayment, verifyBachsWebhookSignature } from "./payments/bachs";
+export { initializeBachsPayment, verifyBachsWebhookSignature, getBachsProductId, BACHS_PRODUCTS } from "./payments/bachs";
 export type { InitializePaymentInput, InitializePaymentResponse } from "./payments/bachs";
 export * from "./email";
 export * from "./logger";

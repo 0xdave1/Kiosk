@@ -181,4 +181,4 @@ This roadmap tracks every milestone from the initial build through public launch
 
 ---
 
-_Last updated: September 2026_
+Last updated: September 2026.

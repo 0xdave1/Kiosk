@@ -13,6 +13,7 @@
 Most small business owners don't need a complicated website builder. They just need a clean place to show what they offer, share their contact details, and start selling — without spending weeks learning tools or paying high monthly fees.
 
 ### Multi-Tenant Capabilities
+
 - **Tenant Workspace Isolation**: Row-level database isolation (`tenants` table) for projects, billing subscriptions, and custom domains.
 - **Custom Domains & Subdomains**: Dynamic routing via Next.js Edge Middleware (`business.kioosk.online` or `customdomain.com`).
 - **Brand Isolation**: Dedicated client dynamic favicon, client-branded preloader, and cinematic Under Construction page for unlaunched subdomains.
@@ -40,6 +41,7 @@ Everything is hosted and managed for you. No technical setup. No complicated bui
 ## Getting Started (Development)
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -47,16 +49,18 @@ Everything is hosted and managed for you. No technical setup. No complicated bui
 2. Configure environment variables in `.env.local` (copy template from `.env.example`).
 
 3. Push PostgreSQL schema:
+
    ```bash
    npx drizzle-kit push
    ```
 
 4. Run the development server:
+
    ```bash
    npm run dev
    ```
 
-Open http://localhost:3000 to preview locally.
+Open [http://localhost:3000](http://localhost:3000) to preview locally.
 
 ## Tech Stack
 

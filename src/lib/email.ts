@@ -493,7 +493,7 @@ export async function sendSiteFlaggedNoticeEmail({
 	currency: string;
 	paymentLink: string;
 }) {
-	const subject = `Action Required: Website Renewal Expired #${invoiceNumber}`;
+	const subject = `Action Required: Website Renewal Expired for ${plan} #${invoiceNumber}`;
 	const contentHtml = `
 		<p style="margin: 0 0 16px 0;">Hi ${userName},</p>
 		<p style="margin: 0 0 16px 0;">

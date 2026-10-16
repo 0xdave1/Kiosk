@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 				tenantId: tenant.id,
 				payload: newProject,
 			});
-		} catch (e) {
+		} catch {
 			// Non-blocking event notification
 		}
 

@@ -13,12 +13,14 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 ## 1. Front-End Redesign & Visual Design Audit
 
 ### Hero Section Redesign (`src/components/Hero.tsx`)
+
 - [x] **High-Impact Headline & Typography**: Redesign hero title with solid high-contrast typography, clean pill badges, and modern responsive font scaling.
 - [x] **Interactive CTA Integration**: Enhance primary and secondary `PillButton` triggers with hover states and subtle button shadows.
 - [x] **Visual Metric Cards & Icons**: Replace empty placeholder badge circles with Lucide React icons (`Zap`, `ShieldCheck`, `TrendingUp`, `Sparkles`).
 - [x] **Enhanced Browser Window Mockup**: Upgrade live website preview card with dynamic status indicators, solid card floaters, and crisp card borders.
 
 ### Design Typos & Visual Consistency Audit
+
 - [x] **Icon & Element Alignment**: Audit components for missing icon SVGs inside circular badges (`Hero.tsx`, `CTA.tsx`, `HowItWorks.tsx`).
 - [x] **Color Token Audit**: Enforce consistent solid design token usage (`#004ac6` primary blue, `emerald-500` status indicators, `slate-900` text).
 - [x] **Copy Clean Up**: Remove illegal em-dashes from user-facing copy in compliance with Kiosk developer guidelines.
@@ -29,6 +31,7 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 ## 2. Multi-Tenant Industry Site Templates & Content Studio
 
 ### Content Studio & Live Interactive Preview (`src/app/dashboard/content/page.tsx`)
+
 - [x] **Multi-Step Content Form**: Brand setup, Design & typography, Page catalog/services, and Social links.
 - [x] **Separated Logo & Brand Assets**: Dedicated Primary Brand Logo module (with checkerboard preview) separate from Brand Photos/Media Assets.
 - [x] **Theme Switcher**: Live dynamic Light Mode vs Midnight Dark Mode (`#070d1d`, `#0d162a`, `#111c33`) preview.
@@ -119,7 +122,7 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 | **Payments** | Bachs Webhook Integration | Completed | `src/app/api/webhooks/` |
 | **E-Commerce** | Multi-Currency Catalog & WhatsApp Ordering | Completed | Content Studio & Preview |
 | **Testing** | Playwright E2E Test Suite | Completed | `*.e2e-spec.ts` |
-| **Performance**| iOS Safari Scroll & Mobile Gesture Polish | Completed | `src/components/` |
+| **Performance** | iOS Safari Scroll & Mobile Gesture Polish | Completed | `src/components/` |
 | **DevOps** | GitHub Actions CI/CD Pipeline | Completed | `.github/workflows/` |
 | **Deploy** | Production Pre-Flight Audit | Ready | Vercel & Neon Setup |
 
@@ -131,5 +134,3 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 2. **Build Success**: `npm run build` generates optimized production bundles without warnings or failures.
 3. **Template Coverage**: Interactive presets and content studio available across all subscription tiers.
 4. **UI Design Standard**: 100% clean solid typography, zero gradients, authentic mobile frame mockup, and sleek dark mode preview.
-
-

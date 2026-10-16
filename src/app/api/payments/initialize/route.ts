@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { auth } from "@/auth";
 import { checkRateLimit, redis } from "@/lib/ratelimit";
-import { initializeBachsPayment } from "@/lib/payments/bachs";
+import { initializeBachsPayment, getBachsProductId } from "@/lib/payments/bachs";
 import { BASE_PRICES_USD, CURRENCIES, PlanKey } from "@/lib/currency";
 
 import { db } from "@/db";
@@ -109,7 +109,9 @@ export async function POST(request: Request) {
 		const gracePeriodEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7-day grace period
 
 		// 5. Initialize Multi-Method Bachs Payment Link
+		const productId = getBachsProductId(plan, billingCycle);
 		const paymentResult = await initializeBachsPayment({
+			productId,
 			amount,
 			usdAmount: baseUsdAmount,
 			currency: targetCurrency.code,
@@ -124,6 +126,7 @@ export async function POST(request: Request) {
 				plan,
 				billingCycle,
 				type: "INITIAL_SETUP",
+				productId,
 			},
 		});
 

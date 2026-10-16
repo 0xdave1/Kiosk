@@ -7,16 +7,12 @@ export const dynamic = "force-dynamic";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-	TrendingUp,
 	Users,
 	MessageCircle,
-	ArrowUpRight,
 	Smartphone,
 	Monitor,
 	Globe,
-	RefreshCw,
 	ArrowLeft,
-	Calendar,
 	Sparkles,
 	Activity,
 	Zap,

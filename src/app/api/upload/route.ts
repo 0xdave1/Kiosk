@@ -81,10 +81,11 @@ export async function POST(request: Request) {
 			},
 			{ status: 200 },
 		);
-	} catch (err: any) {
+	} catch (err: unknown) {
 		console.error("[UPLOAD_API_ERROR]", err);
+		const error = err as Error;
 		return NextResponse.json(
-			{ error: err.message || "Failed to upload file to storage." },
+			{ error: error?.message || "Failed to upload file to storage." },
 			{ status: 500 },
 		);
 	}

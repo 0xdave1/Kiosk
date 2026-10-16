@@ -31,10 +31,40 @@ function getBachsConfig() {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Product Catalog Mappings                                           */
+/* ------------------------------------------------------------------ */
+
+export const BACHS_PRODUCTS = {
+	landing: {
+		monthly: process.env.BACHS_PROD_LANDING_MONTHLY || "prod_5223f9a13c2541eeabef",
+		yearly: process.env.BACHS_PROD_LANDING_YEARLY || "prod_63eade98b47b48a99151",
+	},
+	funnel: {
+		monthly: process.env.BACHS_PROD_FUNNEL_MONTHLY || "prod_222cc418fa6f4e8faf96",
+		yearly: process.env.BACHS_PROD_FUNNEL_YEARLY || "prod_0d0bec9066714f81a923",
+	},
+	store: {
+		monthly: process.env.BACHS_PROD_STORE_MONTHLY || "prod_ca6d57ac86e8495899eb",
+		yearly: process.env.BACHS_PROD_STORE_YEARLY || "prod_47fe5e13ee9345bbb768",
+	},
+} as const;
+
+export function getBachsProductId(plan: string, billingCycle: "monthly" | "yearly"): string | undefined {
+	const normalized = (plan || "").toLowerCase();
+	let key: "landing" | "funnel" | "store" = "landing";
+	if (normalized.includes("funnel")) key = "funnel";
+	else if (normalized.includes("store") || normalized.includes("commerce")) key = "store";
+
+	return BACHS_PRODUCTS[key]?.[billingCycle];
+}
+
+/* ------------------------------------------------------------------ */
 /*  Types                                                               */
 /* ------------------------------------------------------------------ */
 
 export interface InitializePaymentInput {
+	/** Optional Bachs catalog product ID */
+	productId?: string;
 	/** Amount in target currency */
 	amount: number;
 	/** USD base price amount */
@@ -64,7 +94,7 @@ export interface InitializePaymentResponse {
 
 /**
  * Initializes a Bachs checkout session and returns the hosted checkout URL.
- * Uses the "raw amount" flow (no catalog product required).
+ * Supports both product_cart (catalog products) and raw pricing flows.
  */
 export async function initializeBachsPayment(
 	input: InitializePaymentInput,
@@ -82,6 +112,52 @@ export async function initializeBachsPayment(
 	}
 
 	try {
+		// 1. If productId is provided, try catalog product checkout session first
+		if (input.productId) {
+			const productRequestBody = {
+				product_cart: [
+					{
+						product_id: input.productId,
+						quantity: 1,
+					},
+				],
+				customer: {
+					email: input.email,
+					name: input.name,
+				},
+				success_url: input.redirect_url,
+				cancel_url: input.redirect_url.split("?")[0],
+				reference: input.tx_ref,
+				metadata: input.meta ?? {},
+			};
+
+			console.log(`[BACHS_PRODUCT_REQUEST] POST ${BACHS_BASE_URL}/v1/checkout-sessions`, JSON.stringify(productRequestBody, null, 2));
+
+			const prodResponse = await fetch(`${BACHS_BASE_URL}/v1/checkout-sessions`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${BACHS_SECRET_KEY}`,
+				},
+				body: JSON.stringify(productRequestBody),
+			});
+
+			const prodResult = await prodResponse.json();
+			console.log(`[BACHS_PRODUCT_RESPONSE] Status: ${prodResponse.status}`, JSON.stringify(prodResult, null, 2));
+
+			if (prodResponse.ok && prodResult.checkout_url) {
+				console.log(`[BACHS_PRODUCT_SUCCESS] Redirecting customer to: ${prodResult.checkout_url}`);
+				return {
+					success: true,
+					link: prodResult.checkout_url,
+					checkoutId: prodResult.checkout_id,
+				};
+			}
+
+			console.warn(`[BACHS_PRODUCT_FALLBACK] Product checkout rejected (${prodResult.error_code || prodResult.detail || prodResponse.status}). Falling back to raw pricing...`);
+		}
+
+		// 2. Raw pricing flow
 		const targetCurrencyCode = input.currency.toUpperCase();
 		const rate = CURRENCIES[targetCurrencyCode]?.rateFromUSD || 1;
 		const baseUsdPrice = input.usdAmount || (targetCurrencyCode === "USD" ? input.amount : input.amount / rate);
