@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedAdmin } from "@/lib/auth/admin";
 import { db } from "@/db";
-import { users, tenants } from "@/db/schema";
+import { users } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { Logger } from "@/lib/logger";
 

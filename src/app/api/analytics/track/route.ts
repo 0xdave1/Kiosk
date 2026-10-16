@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 				else if (refHost.includes("twitter") || refHost.includes("x.com")) cleanReferrer = "X (Twitter)";
 				else if (refHost.includes("tiktok")) cleanReferrer = "TikTok";
 				else cleanReferrer = refHost;
-			} catch (e) {
+			} catch {
 				cleanReferrer = "other";
 			}
 		}

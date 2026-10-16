@@ -87,13 +87,14 @@ export async function POST(request: Request) {
 				},
 			},
 		);
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("[LOGIN_ERROR]", error);
+		const err = error as { code?: string; message?: string } | null;
 		const isDbError =
-			error?.code === "CONNECT_TIMEOUT" ||
-			error?.code === "ECONNREFUSED" ||
-			error?.message?.includes("CONNECT_TIMEOUT") ||
-			error?.message?.includes("DATABASE_URL");
+			err?.code === "CONNECT_TIMEOUT" ||
+			err?.code === "ECONNREFUSED" ||
+			err?.message?.includes("CONNECT_TIMEOUT") ||
+			err?.message?.includes("DATABASE_URL");
 
 		if (isDbError) {
 			return NextResponse.json(

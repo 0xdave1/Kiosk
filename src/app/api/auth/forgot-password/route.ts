@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 				await db
 					.delete(verificationTokens)
 					.where(eq(verificationTokens.identifier, email));
-			} catch (e) {
+			} catch {
 				// Non-blocking
 			}
 

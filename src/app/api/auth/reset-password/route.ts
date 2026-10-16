@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, verificationTokens, sessions } from "@/db/schema";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { resetPasswordSchema, hashPassword } from "@/lib/auth/password";
 import { checkRateLimit } from "@/lib/ratelimit";
 
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 							eq(verificationTokens.token, token),
 						),
 					);
-			} catch (e) {
+			} catch {
 				// Non-blocking
 			}
 
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
 		// 7. Security: Revoke all existing sessions for this user
 		try {
 			await db.delete(sessions).where(eq(sessions.userId, user.id));
-		} catch (e) {
+		} catch {
 			// Non-blocking
 		}
 

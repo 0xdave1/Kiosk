@@ -49,7 +49,7 @@ export async function GET() {
 						email: dbUser?.email || authSession.user.email || "",
 						image: dbUser?.image || authSession.user.image || null,
 						phone: dbUser?.phone || null,
-						role: dbUser?.role || (authSession.user as any).role || "USER",
+						role: dbUser?.role || (authSession.user as { role?: string }).role || "USER",
 					},
 				},
 				{ status: 200 },

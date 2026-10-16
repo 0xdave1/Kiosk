@@ -3,7 +3,7 @@
 import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
-import { tenants, projects } from "@/db/schema";
+import { projects } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getAuthenticatedTenantContext } from "@/lib/auth/session";
 import { CacheService } from "@/lib/cache/CacheService";

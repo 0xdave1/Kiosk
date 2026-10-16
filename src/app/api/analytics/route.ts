@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { analyticsEvents } from "@/db/schema";
-import { eq, and, gte, desc, sql } from "drizzle-orm";
+import { eq, and, gte, desc } from "drizzle-orm";
 import { getAuthenticatedTenantContext } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
