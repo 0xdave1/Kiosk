@@ -144,7 +144,7 @@ export async function PATCH(
 						try {
 							const parsed = typeof existingProject.content === "string" ? JSON.parse(existingProject.content) : existingProject.content;
 							if (parsed?.businessName) businessTitle = parsed.businessName;
-						} catch (e) {}
+						} catch {}
 					}
 
 					const recipientName = owner.name?.trim() || (owner.email ? owner.email.split("@")[0] : "");

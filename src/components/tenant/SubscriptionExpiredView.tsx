@@ -59,7 +59,7 @@ export default function SubscriptionExpiredView({
 						<span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
 					</span>
 					<span className="text-zinc-300 font-semibold">STATUS: HOSTING PAUSED</span>
-					<span className="hidden sm:inline text-zinc-600">//</span>
+					<span className="hidden sm:inline text-zinc-600">{"//"}</span>
 					<span className="hidden sm:inline text-zinc-500">
 						{tenantSlug ? tenantSlug.toUpperCase() : "KIOSK HOSTING"}
 					</span>

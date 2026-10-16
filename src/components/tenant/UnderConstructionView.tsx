@@ -83,7 +83,7 @@ export default function UnderConstructionView({
 						<span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
 					</span>
 					<span className="text-zinc-200 font-semibold">PRE-LAUNCH PHASE</span>
-					<span className="hidden sm:inline text-zinc-600">//</span>
+					<span className="hidden sm:inline text-zinc-600">{"//"}</span>
 					<span className="hidden sm:inline text-zinc-500">BUILD {tenantSlug ? tenantSlug.toUpperCase() : "LIVE"}</span>
 				</div>
 

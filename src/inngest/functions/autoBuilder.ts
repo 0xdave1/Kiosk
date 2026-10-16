@@ -54,6 +54,7 @@ function normalizeContentForLiveSite(contentData: any, tenantSlug: string, tenan
 		aboutText,
 		contactAddress,
 		cleanWhatsappDigits,
+		tenantSlug,
 	);
 
 	// Check if submitted services are generic dummy data
@@ -151,8 +152,14 @@ function normalizeContentForLiveSite(contentData: any, tenantSlug: string, tenan
 		benefits: blueprint.benefits,
 		testimonials,
 		faqs,
-		themeMode: contentData.themeMode || "light",
+		themeMode: contentData.themeMode || blueprint.themeMode || "light",
 		primaryColor: contentData.primaryColor || blueprint.primaryColor,
+		accentColor: contentData.accentColor || blueprint.accentColor,
+		designTheme: contentData.designTheme || blueprint.designTheme,
+		heroLayout: contentData.heroLayout || blueprint.heroLayout,
+		headerVariant: contentData.headerVariant || blueprint.headerVariant,
+		fontTheme: contentData.fontTheme || blueprint.fontTheme,
+		badgeText: blueprint.badgeText,
 		updatedAt: new Date().toISOString(),
 	};
 }

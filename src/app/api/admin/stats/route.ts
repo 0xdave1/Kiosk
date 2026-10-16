@@ -3,8 +3,6 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedAdmin } from "@/lib/auth/admin";
 import { db } from "@/db";
-import { users, tenants, projects, invoices } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
 import { CURRENCIES } from "@/lib/currency";
 import { Logger } from "@/lib/logger";
 

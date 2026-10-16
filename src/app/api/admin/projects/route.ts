@@ -3,9 +3,10 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedAdmin } from "@/lib/auth/admin";
 import { db } from "@/db";
-import { users, tenants, projects } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { projects } from "@/db/schema";
+import { desc } from "drizzle-orm";
 import { Logger } from "@/lib/logger";
+import type { TenantContentData } from "@/components/tenant/TenantLiveSite";
 
 export const dynamic = "force-dynamic";
 
@@ -38,11 +39,11 @@ export async function GET(request: Request) {
 			const tenant = tenantMap.get(p.tenantId);
 			const owner = tenant ? userMap.get(tenant.ownerId) : null;
 
-			let parsedContent: any = null;
+			let parsedContent: TenantContentData | null = null;
 			if (p.content) {
 				try {
 					parsedContent = JSON.parse(p.content);
-				} catch (e) {
+				} catch {
 					// Fallback
 				}
 			}

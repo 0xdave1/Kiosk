@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 	if (project?.content) {
 		try {
 			parsed = JSON.parse(project.content);
-		} catch (e) {}
+		} catch {}
 	}
 
 	const businessName = parsed.businessName || tenant.name || "Business Website";
@@ -123,7 +123,7 @@ export default async function TenantSubdomainPage({ params }: PageProps) {
 	if (project?.content) {
 		try {
 			parsedContent = JSON.parse(project.content);
-		} catch (e) {}
+		} catch {}
 	}
 
 	const businessName = parsedContent.businessName || tenant.name || cleanSlug;
