@@ -391,15 +391,14 @@ export default function TenantLiveSite({
 											{prod.category}
 										</span>
 									)}
-								</div>
 
-								<p
-									className={`text-xs leading-relaxed ${
-										isDarkMode ? "text-slate-400" : "text-gray-600"
-									}`}>
-									{prod.description}
-								</p>
-							</div>
+									<p
+										className={`text-xs leading-relaxed ${
+											isDarkMode ? "text-slate-400" : "text-gray-600"
+										}`}>
+										{prod.description}
+									</p>
+								</div>
 
 							<div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
 								<span className="text-lg font-extrabold font-nohemi text-blue-600">
