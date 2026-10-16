@@ -57,7 +57,7 @@ export default function PrivacyPolicyPage() {
 								<strong>Site Content:</strong> Text, images, logos, and materials you provide for your website build.
 							</li>
 							<li>
-								<strong>Payment Details:</strong> Handled securely through our payment provider (Paystack). We do not store payment card numbers or banking credentials on our servers.
+								<strong>Payment Details:</strong> Handled securely through our payment provider (Bachs). We do not store payment card numbers or banking credentials on our servers.
 							</li>
 							<li>
 								<strong>Technical Data:</strong> IP address, device type, and standard server log data used to maintain security and platform stability.
@@ -87,7 +87,7 @@ export default function PrivacyPolicyPage() {
 						<p>
 							We work with trusted third-party services to deliver our platform. These
 							include cloud hosting providers, database infrastructure, and certified
-							payment gateways (Paystack). These providers only process information
+							payment gateways (Bachs). These providers only process information
 							strictly as needed to perform their functions on our behalf.
 						</p>
 					</div>

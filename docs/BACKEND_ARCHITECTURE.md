@@ -20,7 +20,7 @@ Every class and module has one, and only one, reason to change.
 
 ### 2. Open/Closed Principle (OCP)
 Software entities are open for extension, but closed for modification.
-- **Payment Processing**: Abstract `PaymentProvider` interface allows adding Stripe, Paystack, or PayPal drivers without modifying core checkout logic.
+- **Payment Processing**: Abstract `PaymentProvider` interface allows adding Stripe, Bachs, or PayPal drivers without modifying core checkout logic.
 
 ### 3. Liskov Substitution Principle (LSP)
 Subtypes must be substitutable for their base types without altering system correctness.

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { auth } from "@/auth";
 import { checkRateLimit, redis } from "@/lib/ratelimit";
-import { initializePaystackPayment } from "@/lib/payments/paystack";
+import { initializeBachsPayment } from "@/lib/payments/bachs";
 import { BASE_PRICES_USD, CURRENCIES, PlanKey } from "@/lib/currency";
 
 import { db } from "@/db";
@@ -108,15 +108,16 @@ export async function POST(request: Request) {
 		const dueDate = new Date();
 		const gracePeriodEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7-day grace period
 
-		// 5. Initialize Multi-Method Paystack Payment Link (Card, Transfer, USSD, Mobile Money)
-		const paymentResult = await initializePaystackPayment({
+		// 5. Initialize Multi-Method Bachs Payment Link
+		const paymentResult = await initializeBachsPayment({
 			amount,
+			usdAmount: baseUsdAmount,
 			currency: targetCurrency.code,
 			email: userEmail,
 			name: userName,
-			reference: tx_ref,
-			callback_url: `${appUrl}/dashboard/content?plan=${plan}`,
-			metadata: {
+			tx_ref,
+			redirect_url: `${appUrl}/dashboard/content?plan=${plan}`,
+			meta: {
 				userId,
 				tenantId: tenant.id,
 				invoiceNumber,

@@ -101,7 +101,7 @@ export const tenants = pgTable("tenants", {
 	plan: text("plan").default("NONE").notNull(), // NONE | LANDING_PAGE | SALES_FUNNEL | E_COMMERCE
 	billingStatus: text("billingStatus").default("ACTIVE").notNull(), // ACTIVE | PENDING | GRACE_PERIOD | PAST_DUE | SUSPENDED
 	autoRenew: boolean("autoRenew").default(false).notNull(), // Whether recurring auto-renewal is active
-	recurringAuthCode: text("recurringAuthCode"), // Paystack reusable authorization_code
+	recurringAuthCode: text("recurringAuthCode"), // Reusable payment authorization code
 	cardLast4: text("cardLast4"),
 	cardBrand: text("cardBrand"),
 	cardExpMonth: text("cardExpMonth"),
@@ -144,7 +144,7 @@ export const subscriptions = pgTable("subscriptions", {
 	tenantId: text("tenantId")
 		.notNull()
 		.references(() => tenants.id, { onDelete: "cascade" }),
-	gateway: text("gateway").notNull(), // "flutterwave" | "stripe" | "paystack"
+	gateway: text("gateway").notNull(), // "bachs" | "stripe"
 	customerId: text("customerId").notNull(),
 	subscriptionId: text("subscriptionId").notNull().unique(),
 	planId: text("planId").notNull(), // "landing-page" | "sales-funnel" | "ecommerce"

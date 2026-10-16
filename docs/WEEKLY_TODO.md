@@ -6,7 +6,7 @@
 
 ## Executive Summary & Core Objectives
 
-This technical TODO roadmap outlines the high-priority engineering tasks, design redesigns, template expansion, test coverage goals, and deployment preparations for **Kiosk** (Next.js 16, React 19, TypeScript, Drizzle ORM, Auth.js v5, Flutterwave, Upstash Redis).
+This technical TODO roadmap outlines the high-priority engineering tasks, design redesigns, template expansion, test coverage goals, and deployment preparations for **Kiosk** (Next.js 16, React 19, TypeScript, Drizzle ORM, Auth.js v5, Bachs, Upstash Redis).
 
 ---
 
@@ -55,7 +55,7 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 
 - [x] **6-Hour Session Expiration**: User sessions expire strictly after 6 hours of inactivity.
 - [x] **Checkout Active Grace Window**: Suspend automatic logout if client is actively completing payment on `/checkout` (`isCheckoutInProgress`).
-- [x] **Pre-Payment Auth Verification**: Validate active user session before dispatching payment payload to Flutterwave gateways.
+- [x] **Pre-Payment Auth Verification**: Validate active user session before dispatching payment payload to Bachs gateways.
 - [x] **User Phone Number DB Column**: Added `phone` column to `users` table with session & profile synchronization.
 
 ---
@@ -75,7 +75,7 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 - [x] **API Endpoint Tests (`*.e2e-spec.ts`)**:
   - `POST /api/auth/register` & `POST /api/auth/login` (validation, rate-limiting, error responses).
   - `POST /api/payments/initialize` (atomic lock `SETNX` double-charge protection).
-  - `POST /api/webhooks/flutterwave` (secret hash verification and event deduplication).
+  - `POST /api/webhooks/bachs` (HMAC signature verification and event deduplication).
 - [x] **GitHub Actions CI/CD Pipeline (`.github/workflows/ci.yml`)**:
   - Automated `tsc --noEmit` and ESLint checks on every PR.
   - Automatic Vitest / Playwright suite execution on merges.
@@ -92,7 +92,7 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 - [x] **Kiosk Project Logo Integration**: Replaced placeholder "K" box in `/dashboard` header and `/not-found` page with official `/KIOSK PNG2.png` logo.
 - [x] **Mobile Responsiveness & iOS Safari Performance**: Fixed scroll animation containing block transforms, added hide-on-scroll navigation, and implemented touch-friendly swipe gestures with pagination dots.
 - [x] **Contact Page Interactive PillButton**: Upgraded the message submission CTA on `/contact` to use the animated `PillButton` component.
-- [x] **Paystack Webhook & Production Security**: Implemented HMAC-SHA512 webhook signature verification, strict production key enforcement, and payment reconciliation.
+- [x] **Bachs Webhook & Production Security**: Implemented HMAC-SHA256 webhook signature verification, strict production key enforcement, and payment reconciliation.
 
 ---
 
@@ -116,7 +116,7 @@ This technical TODO roadmap outlines the high-priority engineering tasks, design
 | **Studio** | Content Studio with Live Preview & Dark Mode | Completed | `src/app/dashboard/content/` |
 | **Templates** | Templates Directory with Live Modals | Completed | `src/app/dashboard/templates/` |
 | **Auth** | 6-Hour Session Token & Checkout Grace Window | Completed | `src/lib/auth/session.ts` |
-| **Payments** | Paystack & Flutterwave Webhook Integration | Completed | `src/app/api/webhooks/` |
+| **Payments** | Bachs Webhook Integration | Completed | `src/app/api/webhooks/` |
 | **E-Commerce** | Multi-Currency Catalog & WhatsApp Ordering | Completed | Content Studio & Preview |
 | **Testing** | Playwright E2E Test Suite | Completed | `*.e2e-spec.ts` |
 | **Performance**| iOS Safari Scroll & Mobile Gesture Polish | Completed | `src/components/` |

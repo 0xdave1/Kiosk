@@ -33,7 +33,7 @@ This roadmap tracks every milestone from the initial build through public launch
 - ✅ Custom domain rewriter (`<customdomain.com> → /domains/[domain]`)
 - ✅ Upstash Redis rate limiting (Sliding Window)
 - ✅ Cloudinary multi-tenant media isolation (`kiosk/tenants/<id>/...`)
-- ✅ Flutterwave subscription payments (3 plans × 2 billing cycles)
+- ✅ Bachs subscription payments (3 plans × 2 billing cycles)
 - ✅ Webhook signature verification + idempotency locks
 - ✅ Resend transactional email engine (`src/lib/email.ts`)
 
@@ -94,7 +94,7 @@ This roadmap tracks every milestone from the initial build through public launch
   - Client-branded page preloader
   - Cinematic animated Under Construction page for unlaunched subdomains
 - ✅ Admin Fulfillment Queue enhancements (real user avatars/profile pictures, revision workflow)
-- ✅ Dual payment gateway integration (Flutterwave + Paystack webhooks & production security)
+- ✅ Enterprise payment gateway integration (Bachs webhooks & production security)
 
 ---
 
@@ -135,7 +135,7 @@ This roadmap tracks every milestone from the initial build through public launch
 - 🔄 Production environment variables finalised and secured
 - 🔄 Neon PostgreSQL production branch verified
 - 🔄 Upstash Redis production instance configured
-- 🔄 Flutterwave and Paystack live-mode keys configured
+- 🔄 Bachs live-mode keys configured
 - 🔄 Resend domain verified for deliverability (`noreply@kioosk.online`)
 - 🔄 Cloudinary production plan verified
 - 🔄 Vercel production deployment + wildcard subdomain routing verified (`*.kioosk.online`)

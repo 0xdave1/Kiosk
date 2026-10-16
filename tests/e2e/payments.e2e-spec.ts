@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { initializePaystackPayment } from "../../src/lib/payments/paystack";
+import { initializeBachsPayment } from "../../src/lib/payments/bachs";
 import { BASE_PRICES_USD, CURRENCIES, formatPrice, getCurrencyForCountry } from "../../src/lib/currency";
 
 test.describe("Payments & Currency Architecture", () => {
@@ -28,19 +28,18 @@ test.describe("Payments & Currency Architecture", () => {
 		expect(gbCurrency.code).toBe("GBP");
 	});
 
-	test("initializePaystackPayment - Gracefully initialises dev/mock fallback link", async () => {
-		const result = await initializePaystackPayment({
+	test("initializeBachsPayment - Gracefully initialises dev/mock fallback link", async () => {
+		const result = await initializeBachsPayment({
 			amount: 50,
 			currency: "USD",
 			email: "client@example.com",
 			name: "Client Name",
-			reference: "tx_test_12345",
-			callback_url: "https://kioosk.online/dashboard/content",
+			tx_ref: "tx_test_12345",
+			redirect_url: "https://kioosk.online/dashboard/content",
 		});
 
 		expect(result.success).toBe(true);
 		expect(result.link).toBeDefined();
 		expect(result.link).toContain("https://kioosk.online/dashboard/content");
-		expect(result.reference).toBe("tx_test_12345");
 	});
 });

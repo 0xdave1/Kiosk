@@ -194,7 +194,7 @@ function ContentForm() {
 		{
 			id: "f-2",
 			question: "Are payment gateways and WhatsApp integrated?",
-			answer: "Yes! We link direct WhatsApp ordering, Stripe, Paystack, and Calendly seamlessly.",
+			answer: "Yes! We link direct WhatsApp ordering, Stripe, Bachs, and Calendly seamlessly.",
 		},
 		{
 			id: "f-3",

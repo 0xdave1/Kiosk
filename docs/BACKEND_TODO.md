@@ -18,7 +18,7 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 | **Database** | Neon PostgreSQL Serverless with PgBouncer Pooling |
 | **ORM & Querying** | Drizzle ORM (`drizzle-orm`, `postgres`) |
 | **Media Storage** | Cloudinary Multi-Tenant Isolated Buckets (`kiosk/tenants/<id>/...`) |
-| **Payments** | Flutterwave Multi-Plan Subscriptions & Idempotency Locks |
+| **Payments** | Bachs Multi-Plan Subscriptions & Idempotency Locks |
 | **Email & Transact** | Resend Transactional Email Engine (`src/lib/email.ts`) |
 
 ---
@@ -73,8 +73,8 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 ---
 
 ## Phase 5: Payment Gateway & Subscriptions
-- [x] Flutterwave Multi-Plan Subscription Integration (3 tiers x 2 cycles).
-- [x] Paystack Webhook Handler (`/api/webhooks/paystack`) with HMAC-SHA512 signature verification.
-- [x] Production security: strict requirement for `PAYSTACK_SECRET_KEY` and removal of mock bypasses in production.
+- [x] Bachs Multi-Plan Subscription Integration (3 tiers x 2 cycles).
+- [x] Bachs Webhook Handler (`/api/webhooks/bachs`) with HMAC-SHA256 signature verification.
+- [x] Production security: strict requirement for `BACHS_SECRET_KEY` and removal of mock bypasses in production.
 - [x] Automated invoice generation and payment idempotency.
 - [x] Grace period handling and renewal tracking.

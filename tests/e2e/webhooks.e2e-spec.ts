@@ -1,20 +1,16 @@
 import { test, expect } from "@playwright/test";
-import {
-	verifyPaystackWebhookSignature,
-	verifyPaystackTransaction,
-} from "../../src/lib/payments/paystack";
+import { verifyBachsWebhookSignature } from "../../src/lib/payments/bachs";
 
-test.describe("Paystack Webhook Security & Transaction Verification", () => {
-	test("verifyPaystackWebhookSignature - Validates webhook signature handling", () => {
-		// In dev/mock mode or with valid secret
-		const isValid = verifyPaystackWebhookSignature("mock_signature", JSON.stringify({ event: "charge.success" }));
+test.describe("Bachs Webhook Security & Verification", () => {
+	test("verifyBachsWebhookSignature - Validates webhook signature handling", () => {
+		// When BACHS_WEBHOOK_SECRET is not set or in dev mode
+		const timestamp = Math.floor(Date.now() / 1000).toString();
+		const isValid = verifyBachsWebhookSignature(
+			JSON.stringify({ event: "collection.succeeded" }),
+			timestamp,
+			"mock_signature",
+		);
 		expect(typeof isValid).toBe("boolean");
 	});
-
-	test("verifyPaystackTransaction - Returns verification when checked", async () => {
-		const verified = await verifyPaystackTransaction("kiosk_tx_123456");
-		expect(verified).toBeDefined();
-		expect(verified?.status).toBe("success");
-		expect(verified?.reference).toBe("kiosk_tx_123456");
-	});
 });
+

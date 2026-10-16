@@ -69,7 +69,7 @@ export default function TermsOfServicePage() {
 						</h3>
 						<p>
 							Plans are billed in advance on a recurring monthly or annual basis via our
-							certified payment partner (Paystack).
+							certified payment partner (Bachs).
 						</p>
 						<p>
 							Subscriptions renew automatically until cancelled. You can view invoices and

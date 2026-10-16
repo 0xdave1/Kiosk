@@ -125,7 +125,7 @@ export const apiRatelimit = new Ratelimit({
 | **Public API** | `/api/v1/public/*` | **60 requests / 1 min** per IP | HTTP `429 Too Many Requests` |
 | **Content Studio & Projects** | `/api/projects`, `/api/projects/content` | **120 requests / 1 min** per User ID | HTTP `429 Too Many Requests` |
 | **Client Workspace** | `/api/v1/projects/*`, `/checkout` | **200 requests / 1 min** per User ID | HTTP `429 Too Many Requests` |
-| **Webhooks** | `/api/webhooks/flutterwave`, `/api/webhooks/stripe` | **500 requests / 1 min** (IP Whitelisted) | HTTP `429 Too Many Requests` |
+| **Webhooks** | `/api/webhooks/bachs`, `/api/webhooks/stripe` | **500 requests / 1 min** (IP Whitelisted) | HTTP `429 Too Many Requests` |
 
 ### Rate Limit HTTP Headers Response
 When a client makes a request, the middleware injects standard rate limit headers:

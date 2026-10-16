@@ -14,14 +14,12 @@
 import { db } from "@/db";
 import { tenants, users, invoices, subscriptions, projects } from "@/db/schema";
 import { eq, and, lte, gt, or, inArray } from "drizzle-orm";
-import { initializePaystackPayment, chargePaystackAuthorization } from "@/lib/payments/paystack";
+import { initializeBachsPayment } from "@/lib/payments/bachs";
 import { BASE_PRICES_USD, PlanKey } from "@/lib/currency";
 import {
 	sendPaymentRequestEmail,
 	sendGracePeriodReminderEmail,
 	sendSiteFlaggedNoticeEmail,
-	sendRecurringPaymentSuccessEmail,
-	sendRecurringPaymentFailedEmail,
 	sendPlanTerminatedNoticeEmail,
 	sendRecurringSetupReminderEmail,
 } from "@/lib/email";
@@ -60,7 +58,7 @@ export async function processScheduledBillingJob() {
 		});
 
 		for (const tenant of dueRecurringTenants) {
-			if (tenant.plan === "NONE" || !tenant.recurringAuthCode) continue;
+			if (tenant.plan === "NONE") continue;
 
 			const owner = await db.query.users.findFirst({
 				where: eq(users.id, tenant.ownerId),
@@ -77,15 +75,17 @@ export async function processScheduledBillingJob() {
 			const currency = "USD";
 			const invoiceNumber = `INV-${now.getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
 			const tx_ref = `kiosk_rec_${crypto.randomUUID()}`;
+			const graceEnd = tenant.gracePeriodEnd || new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-			// Attempt automated recurring debit via Paystack
-			const chargeResult = await chargePaystackAuthorization({
-				authorization_code: tenant.recurringAuthCode,
-				email: owner.email,
+			// Generate renewal invoice payment link via Bachs
+			const paymentResult = await initializeBachsPayment({
 				amount,
 				currency,
-				reference: tx_ref,
-				metadata: {
+				email: owner.email,
+				name: owner.name || "Kiosk Subscriber",
+				tx_ref,
+				redirect_url: `${appUrl}/dashboard/billing?payment=success&invoice=${invoiceNumber}`,
+				meta: {
 					userId: owner.id,
 					tenantId: tenant.id,
 					invoiceNumber,
@@ -95,129 +95,38 @@ export async function processScheduledBillingJob() {
 				},
 			});
 
-			if (chargeResult.success) {
-				// Extend subscription by 1 month (30 days) or 1 year
-				const durationDays = billingCycle === "yearly" ? 365 : 30;
-				const newPeriodEnd = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
-				const newGraceEnd = new Date(newPeriodEnd.getTime() + 7 * 24 * 60 * 60 * 1000);
+			const link = paymentResult.link || `${appUrl}/dashboard/billing`;
 
-				await db
-					.update(tenants)
-					.set({
-						billingStatus: "ACTIVE",
-						currentPeriodEnd: newPeriodEnd,
-						gracePeriodEnd: newGraceEnd,
-						updatedAt: now,
-					})
-					.where(eq(tenants.id, tenant.id));
+			// Insert pending renewal invoice
+			await db.insert(invoices).values({
+				invoiceNumber,
+				tenantId: tenant.id,
+				userId: owner.id,
+				plan: tenant.plan,
+				billingCycle,
+				type: "RECURRING_HOSTING",
+				amount,
+				currency,
+				status: "PENDING",
+				paymentLink: link,
+				txRef: tx_ref,
+				dueDate: now,
+				gracePeriodEnd: graceEnd,
+			});
 
-				if (sub) {
-					await db
-						.update(subscriptions)
-						.set({
-							status: "active",
-							currentPeriodStart: now,
-							currentPeriodEnd: newPeriodEnd,
-							updatedAt: now,
-						})
-						.where(eq(subscriptions.id, sub.id));
-				}
+			// Dispatch renewal payment request email
+			await sendPaymentRequestEmail({
+				toEmail: owner.email,
+				userName: owner.name || "Subscriber",
+				invoiceNumber,
+				plan: tenant.plan,
+				amount,
+				currency,
+				dueDate: now.toLocaleDateString(),
+				paymentLink: link,
+			});
 
-				// Record paid invoice
-				await db.insert(invoices).values({
-					invoiceNumber,
-					tenantId: tenant.id,
-					userId: owner.id,
-					plan: tenant.plan,
-					billingCycle,
-					type: "RECURRING_HOSTING",
-					amount,
-					currency,
-					status: "PAID",
-					paymentMethod: "card",
-					txRef: tx_ref,
-					dueDate: now,
-					gracePeriodEnd: newGraceEnd,
-					paidAt: now,
-				});
-
-				// Dispatch confirmation email
-				await sendRecurringPaymentSuccessEmail({
-					toEmail: owner.email,
-					userName: owner.name || "Subscriber",
-					plan: tenant.plan.replace(/_/g, " "),
-					amount,
-					currency,
-					cardLast4: tenant.cardLast4 || undefined,
-					nextBillingDate: newPeriodEnd.toLocaleDateString(),
-				});
-
-				results.recurringRenewalsProcessed++;
-			} else {
-				// Debit failed (card declined/expired). Move autoRenew to false and alert subscriber
-				results.recurringRenewalsFailed++;
-				Logger.warn(`Recurring charge failed for tenant ${tenant.id}: ${chargeResult.error}`);
-
-				const graceEnd = tenant.gracePeriodEnd || new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-				// Generate fallback payment link
-				const paymentResult = await initializePaystackPayment({
-					amount,
-					currency,
-					email: owner.email,
-					name: owner.name || "Kiosk Subscriber",
-					reference: tx_ref,
-					callback_url: `${appUrl}/dashboard/billing?payment=success&invoice=${invoiceNumber}`,
-					metadata: {
-						userId: owner.id,
-						tenantId: tenant.id,
-						invoiceNumber,
-						plan: tenant.plan,
-						billingCycle,
-						type: "RECURRING_HOSTING",
-					},
-				});
-
-				const link = paymentResult.link || `${appUrl}/dashboard/billing`;
-
-				// Insert pending invoice
-				await db.insert(invoices).values({
-					invoiceNumber,
-					tenantId: tenant.id,
-					userId: owner.id,
-					plan: tenant.plan,
-					billingCycle,
-					type: "RECURRING_HOSTING",
-					amount,
-					currency,
-					status: "PENDING",
-					paymentLink: link,
-					txRef: tx_ref,
-					dueDate: now,
-					gracePeriodEnd: graceEnd,
-				});
-
-				// Update tenant status to GRACE_PERIOD & flag recurring card
-				await db
-					.update(tenants)
-					.set({
-						billingStatus: "GRACE_PERIOD",
-						autoRenew: false, // Turn off auto-renew until customer updates card
-						updatedAt: now,
-					})
-					.where(eq(tenants.id, tenant.id));
-
-				await sendRecurringPaymentFailedEmail({
-					toEmail: owner.email,
-					userName: owner.name || "Subscriber",
-					plan: tenant.plan.replace(/_/g, " "),
-					amount,
-					currency,
-					cardLast4: tenant.cardLast4 || undefined,
-					paymentLink: link,
-					dueDate: graceEnd.toLocaleDateString(),
-				});
-			}
+			results.invoicesGenerated++;
 		}
 
 		// =========================================================================
@@ -268,14 +177,14 @@ export async function processScheduledBillingJob() {
 			const dueDate = tenant.currentPeriodEnd || now;
 			const gracePeriodEnd = new Date(dueDate.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-			const paymentResult = await initializePaystackPayment({
+			const paymentResult = await initializeBachsPayment({
 				amount,
 				currency,
 				email: owner.email,
 				name: owner.name || "Kiosk Subscriber",
-				reference: tx_ref,
-				callback_url: `${appUrl}/dashboard/billing?payment=success&invoice=${invoiceNumber}`,
-				metadata: {
+				tx_ref,
+				redirect_url: `${appUrl}/dashboard/billing?payment=success&invoice=${invoiceNumber}`,
+				meta: {
 					userId: owner.id,
 					tenantId: tenant.id,
 					invoiceNumber,

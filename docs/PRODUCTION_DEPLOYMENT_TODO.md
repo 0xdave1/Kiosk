@@ -2,7 +2,7 @@
 
 # Production Deployment Checklist & Technical TODO — Kiosk
 
-This checklist defines every step required to deploy **Kiosk** to production on **Vercel / AWS** with **Neon PostgreSQL**, **Flutterwave Payments**, **Upstash Redis**, and **Wildcard Subdomain Routing**.
+This checklist defines every step required to deploy **Kiosk** to production on **Vercel / AWS** with **Neon PostgreSQL**, **Bachs Payments**, **Upstash Redis**, and **Wildcard Subdomain Routing**.
 
 ---
 
@@ -37,16 +37,16 @@ This checklist defines every step required to deploy **Kiosk** to production on 
 
 ---
 
-## 💳 3. Payment Gateway & Webhooks (Flutterwave)
+## 💳 3. Payment Gateway & Webhooks (Bachs)
 
 - [ ] **Switch to Live API Keys**:
-  - Navigate to Flutterwave Dashboard -> Settings -> API Keys.
-  - Copy Live Keys into `FLUTTERWAVE_PUBLIC_KEY`, `FLUTTERWAVE_SECRET_KEY`, and `FLUTTERWAVE_ENCRYPTION_KEY`.
+  - Navigate to Bachs Dashboard -> Settings -> API Keys.
+  - Copy Live Key into `BACHS_SECRET_KEY` (`sk_live_...`).
 - [ ] **Configure Webhook Endpoint**:
-  - Open Flutterwave Dashboard -> Settings -> Webhooks.
-  - Set Webhook URL to: `https://kiosk.site/api/webhooks/flutterwave`.
-  - Set Secret Hash to a strong secret (e.g. `kiosk_flw_live_secret_hash_2026`).
-  - Copy the exact same hash to Vercel Environment Variable: `FLUTTERWAVE_SECRET_HASH`.
+  - Open Bachs Dashboard -> Settings -> Webhooks.
+  - Set Webhook URL to: `https://kiosk.site/api/webhooks/bachs`.
+  - Set Webhook Secret to a strong secret.
+  - Copy the exact secret to Vercel Environment Variable: `BACHS_WEBHOOK_SECRET`.
 
 ---
 

@@ -30,9 +30,8 @@ RESEND_API_KEY="re_..."
 EMAIL_FROM="Kiosk <noreply@kioosk.online>"
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your_cloud_name"
 CLOUDINARY_API_KEY="your_api_key"
-CLOUDINARY_API_SECRET="your_api_secret"
-FLUTTERWAVE_PUBLIC_KEY="FLWPUBK-..."
-FLUTTERWAVE_SECRET_KEY="FLWSECK-..."
+BACHS_SECRET_KEY="sk_live_..."
+BACHS_WEBHOOK_SECRET="whsec_..."
 ```
 
 3. Start the development server:
@@ -95,7 +94,7 @@ src/
 │       ├── auth/               # Register, Login, Logout, Session handlers
 │       ├── upload/route.ts     # Multi-tenant Cloudinary upload endpoint
 │       ├── projects/content/   # Customer intake submission endpoint with email alerts
-│       └── webhooks/           # Payment webhooks (/paystack, /flutterwave)
+│       └── webhooks/           # Payment webhooks (/bachs)
 │
 ├── components/
 │   ├── admin/
@@ -156,8 +155,7 @@ To ensure client sites maintain their unique brand identity and never leak Kiosk
 
 ---
 
-## Payment Gateways & Webhook Infrastructure
+## Payment Gateway & Webhook Infrastructure
 
-Kiosk supports dual payment gateways:
-- **Paystack (`/api/webhooks/paystack`)**: Signature verification via `x-paystack-signature` HMAC SHA512, strict production secret requirement, transaction verification, and automatic tenant activation.
-- **Flutterwave (`/api/webhooks/flutterwave`)**: Secret hash header verification, idempotency locks via Upstash Redis (`SETNX`), and subscription cycle handling.
+Kiosk integrates with Bachs.io:
+- **Bachs (`/api/webhooks/bachs`)**: HMAC-SHA256 signature verification via `x-bachs-signature` and timestamp freshness checks, strict production secret requirement, transaction verification, automated tenant billing activation, and async invoice PDF generation.

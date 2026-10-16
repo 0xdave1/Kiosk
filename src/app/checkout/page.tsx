@@ -183,7 +183,7 @@ function CheckoutContent() {
 
 				<div className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
 					<Lock className="w-3.5 h-3.5 text-emerald-600" />
-					<span>Secured by Paystack</span>
+					<span>Secured by Bachs</span>
 				</div>
 			</div>
 

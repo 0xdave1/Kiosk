@@ -115,7 +115,7 @@
 ## Security & Deployment
 
 - Deployments hosted on Vercel with automatic edge CDN caching for static assets.
-- Dual payment webhooks (`/api/webhooks/paystack`, `/api/webhooks/flutterwave`) with cryptographic HMAC signature verification and idempotency locks.
+- Payment webhook (`/api/webhooks/bachs`) with cryptographic HMAC signature verification and idempotency locks.
 - Input validation on onboarding and project wizard forms via Zod schemas.
 - Neon PostgreSQL database with PgBouncer connection pooling.
 - Transport Layer Security (TLS 1.3) across all endpoints.

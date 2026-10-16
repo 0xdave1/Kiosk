@@ -17,6 +17,7 @@
  */
 
 import crypto from "crypto";
+import { CURRENCIES } from "@/lib/currency";
 
 const BACHS_WEBHOOK_SECRET = process.env.BACHS_WEBHOOK_SECRET || "";
 
@@ -28,7 +29,6 @@ function getBachsConfig() {
 		: "https://api.bachs.io";
 	return { key, isSandbox, baseUrl };
 }
-
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -48,7 +48,7 @@ export interface InitializePaymentInput {
 	/** Where Bachs redirects on success — ?checkout_id= is appended */
 	redirect_url: string;
 	/** Optional metadata forwarded in webhooks (up to 20 key/value pairs) */
-	meta?: Record<string, any>;
+	meta?: Record<string, unknown>;
 }
 
 export interface InitializePaymentResponse {
@@ -83,11 +83,12 @@ export async function initializeBachsPayment(
 
 	try {
 		const targetCurrencyCode = input.currency.toUpperCase();
-		const baseUsdPrice = input.usdAmount || (targetCurrencyCode === "USD" ? input.amount : input.amount / 1620);
+		const rate = CURRENCIES[targetCurrencyCode]?.rateFromUSD || 1;
+		const baseUsdPrice = input.usdAmount || (targetCurrencyCode === "USD" ? input.amount : input.amount / rate);
 
 		// Per Bachs docs: organization base currency is USD.
 		// Use USD as primary pricing.currency and currency_options for local currency overrides (e.g. NGN).
-		const pricing: Record<string, any> = {
+		const pricing: Record<string, unknown> = {
 			currency: "USD",
 			amount: baseUsdPrice.toFixed(2),
 		};
@@ -139,15 +140,15 @@ export async function initializeBachsPayment(
 			link: result.checkout_url,
 			checkoutId: result.checkout_id,
 		};
-	} catch (err: any) {
+	} catch (err: unknown) {
 		console.error("[BACHS_INIT_EXCEPTION]", err);
+		const error = err as Error;
 		return {
 			success: false,
-			error: err?.message || "Unexpected network error during Bachs payment initialization",
+			error: error?.message || "Unexpected network error during Bachs payment initialization",
 		};
 	}
 }
-
 
 /* ------------------------------------------------------------------ */
 /*  Webhook signature verification                                      */
@@ -202,10 +203,3 @@ export function verifyBachsWebhookSignature(
 		return false;
 	}
 }
-
-/* ------------------------------------------------------------------ */
-/*  Legacy alias — keeps any existing imports working                   */
-/* ------------------------------------------------------------------ */
-
-/** @deprecated Use initializeBachsPayment instead */
-export const initializeFlutterwavePayment = initializeBachsPayment;

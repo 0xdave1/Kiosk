@@ -63,7 +63,7 @@ Open http://localhost:3000 to preview locally.
 - **Framework**: Next.js 16 (App Router & Edge Middleware)
 - **Database & ORM**: Drizzle ORM + Neon PostgreSQL (Multi-tenant schema)
 - **Authentication**: Auth.js v5 (NextAuth) + Password Hashing (bcryptjs 12 rounds)
-- **Payments**: Paystack & Flutterwave (HMAC-SHA512 Webhooks & Subscriptions)
+- **Payments**: Bachs.io (HMAC-SHA256 Webhooks & Multi-Currency Hosted Checkout Sessions)
 - **Media Storage**: Cloudinary (Multi-tenant isolated buckets)
 - **Transactional Email**: Resend API (`src/lib/email.ts`)
 - **Rate Limiting & Cache**: Upstash Redis (Sliding Window & Idempotency Locks)
