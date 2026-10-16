@@ -204,6 +204,9 @@ export async function sendWebsiteReviewNotificationToAdmin(payload: WebsiteRevie
 	const adminEmail = process.env.ADMIN_EMAIL || process.env.NOTIFICATION_EMAIL;
 	if (!adminEmail) {
 		console.warn("[EMAIL_ADMIN_NOTICE] ADMIN_EMAIL or NOTIFICATION_EMAIL is not configured.");
+		if (process.env.NODE_ENV !== "production") {
+			return { success: true, id: `dev_mock_${crypto.randomUUID().slice(0, 8)}` };
+		}
 		return { success: false, error: "Admin email not configured" };
 	}
 	const appUrl = getAppUrl();
@@ -819,4 +822,3 @@ export async function sendRecurringSetupReminderEmail({
 
 	return sendEmail({ to: toEmail, subject, html });
 }
-

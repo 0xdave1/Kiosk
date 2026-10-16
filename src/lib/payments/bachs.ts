@@ -88,6 +88,17 @@ export interface InitializePaymentResponse {
 	error?: string;
 }
 
+function shouldUseDevFallback(): boolean {
+	return process.env.NODE_ENV !== "production";
+}
+
+function buildDevFallbackLink(redirectUrl: string, txRef: string): string {
+	const fallbackUrl = new URL(redirectUrl);
+	fallbackUrl.searchParams.set("checkout", "mock");
+	fallbackUrl.searchParams.set("tx_ref", txRef);
+	return fallbackUrl.toString();
+}
+
 /* ------------------------------------------------------------------ */
 /*  Checkout session initialization                                     */
 /* ------------------------------------------------------------------ */
@@ -104,6 +115,13 @@ export async function initializeBachsPayment(
 	console.log(`[BACHS] Key check: ${BACHS_SECRET_KEY ? "PRESENT (" + BACHS_SECRET_KEY.slice(0, 10) + "...)" : "MISSING"} | API URL: ${BACHS_BASE_URL}`);
 
 	if (!BACHS_SECRET_KEY) {
+		if (shouldUseDevFallback()) {
+			return {
+				success: true,
+				link: buildDevFallbackLink(input.redirect_url, input.tx_ref),
+				checkoutId: `mock_${input.tx_ref}`,
+			};
+		}
 		console.error("[BACHS_ERROR] BACHS_SECRET_KEY is not loaded in process.env. Did you restart `npm run dev` after editing .env.local?");
 		return {
 			success: false,
@@ -204,6 +222,13 @@ export async function initializeBachsPayment(
 		if (!response.ok || !result.checkout_url) {
 			const errorMsg = result.message || result.error || result.detail || `Bachs API error (HTTP ${response.status})`;
 			console.error("[BACHS_INIT_ERROR]", errorMsg, result);
+			if (shouldUseDevFallback()) {
+				return {
+					success: true,
+					link: buildDevFallbackLink(input.redirect_url, input.tx_ref),
+					checkoutId: `mock_${input.tx_ref}`,
+				};
+			}
 			return {
 				success: false,
 				error: errorMsg,
@@ -218,6 +243,13 @@ export async function initializeBachsPayment(
 		};
 	} catch (err: unknown) {
 		console.error("[BACHS_INIT_EXCEPTION]", err);
+		if (shouldUseDevFallback()) {
+			return {
+				success: true,
+				link: buildDevFallbackLink(input.redirect_url, input.tx_ref),
+				checkoutId: `mock_${input.tx_ref}`,
+			};
+		}
 		const error = err as Error;
 		return {
 			success: false,
