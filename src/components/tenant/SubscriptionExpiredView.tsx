@@ -61,7 +61,7 @@ export default function SubscriptionExpiredView({
 					<span className="text-zinc-300 font-semibold">STATUS: HOSTING PAUSED</span>
 					<span className="hidden sm:inline text-zinc-600">{"//"}</span>
 					<span className="hidden sm:inline text-zinc-500">
-						{tenantSlug ? tenantSlug.toUpperCase() : "KIOSK HOSTING"}
+						{tenantSlug ? tenantSlug.toUpperCase() : "MANAGED CLOUD"}
 					</span>
 				</div>
 
@@ -148,10 +148,7 @@ export default function SubscriptionExpiredView({
 			<footer className="relative z-10 w-full px-6 py-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/[0.06] text-[11px] font-mono text-zinc-500 uppercase tracking-wider">
 				<p>© {new Date().getFullYear()} {businessName}. All rights reserved.</p>
 				<p className="flex items-center gap-1.5 text-zinc-400">
-					<span>Powered by</span>
-					<Link href="https://kioosk.online" className="text-white font-bold hover:underline">
-						Kiosk
-					</Link>
+					<span>Preserved Securely</span>
 				</p>
 			</footer>
 		</div>

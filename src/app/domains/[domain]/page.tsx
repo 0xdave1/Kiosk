@@ -4,7 +4,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { db } from "@/db";
 import { tenants, projects } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or, ilike } from "drizzle-orm";
 import TenantLiveSite from "@/components/tenant/TenantLiveSite";
 import type { TenantContentData } from "@/components/tenant/TenantLiveSite";
 import UnderConstructionView from "@/components/tenant/UnderConstructionView";
@@ -24,14 +24,19 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
 	const { domain } = await params;
-	const cleanDomain = domain.toLowerCase().trim();
+	const rawDomain = domain.toLowerCase().trim();
+	const cleanDomain = rawDomain.replace(/^www\./, "");
 
 	const tenant = await db.query.tenants.findFirst({
-		where: eq(tenants.customDomain, cleanDomain),
+		where: or(
+			eq(tenants.customDomain, cleanDomain),
+			eq(tenants.customDomain, `www.${cleanDomain}`),
+			ilike(tenants.customDomain, `%${cleanDomain}%`),
+		),
 	});
 
 	if (!tenant) {
-		return { title: "Domain Not Configured | Kiosk" };
+		return { title: "Domain Not Configured" };
 	}
 
 	const project = await db.query.projects.findFirst({
@@ -42,14 +47,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 	if (project?.content) {
 		try {
 			parsed = JSON.parse(project.content);
-		} catch (e) {}
+		} catch {}
 	}
 
 	const businessName = parsed.businessName || tenant.name || "Business Website";
 	const tagline = parsed.tagline || "Official Online Store & Services";
+	const brandColor = (parsed.primaryColor || "#004ac6").replace("#", "%23");
 	const faviconUrl =
 		parsed.logoImage?.url ||
-		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23004ac6'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
+		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='${brandColor}'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
 
 	return {
 		title: `${businessName} | ${tagline}`,
@@ -69,11 +75,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CustomDomainPage({ params }: PageProps) {
 	const { domain } = await params;
-	const cleanDomain = domain.toLowerCase().trim();
+	const rawDomain = domain.toLowerCase().trim();
+	const cleanDomain = rawDomain.replace(/^www\./, "");
 
-	// 1. Fetch Tenant matching customDomain
+	// 1. Fetch Tenant matching customDomain (with or without www)
 	const tenant = await db.query.tenants.findFirst({
-		where: eq(tenants.customDomain, cleanDomain),
+		where: or(
+			eq(tenants.customDomain, cleanDomain),
+			eq(tenants.customDomain, `www.${cleanDomain}`),
+			ilike(tenants.customDomain, `%${cleanDomain}%`),
+		),
 	});
 
 	if (!tenant) {
@@ -85,12 +96,12 @@ export default async function CustomDomainPage({ params }: PageProps) {
 					</div>
 					<h2 className="text-xl font-bold text-gray-900">Domain Not Connected</h2>
 					<p className="text-xs text-gray-500">
-						The domain <code className="font-bold text-gray-700">{cleanDomain}</code> is not connected to an active Kiosk website.
+						The domain <code className="font-bold text-gray-700">{rawDomain}</code> is not connected to an active website.
 					</p>
 					<Link
 						href="https://kioosk.online"
 						className="inline-block px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors">
-						Connect Domain on Kiosk
+						Connect Domain
 					</Link>
 				</div>
 			</div>
@@ -106,13 +117,14 @@ export default async function CustomDomainPage({ params }: PageProps) {
 	if (project?.content) {
 		try {
 			parsedContent = JSON.parse(project.content);
-		} catch (e) {}
+		} catch {}
 	}
 
 	const businessName = parsedContent.businessName || tenant.name || cleanDomain;
+	const brandColor = (parsedContent.primaryColor || "#004ac6").replace("#", "%23");
 	const faviconUrl =
 		parsedContent.logoImage?.url ||
-		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23004ac6'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
+		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='${brandColor}'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
 
 	// Check if plan has been terminated or suspended at the end of the subscription period
 	const isPlanTerminated =

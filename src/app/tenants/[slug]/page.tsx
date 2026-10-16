@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 	const { tenant, project } = await resolveTenantAndProject(slug);
 
 	if (!tenant) {
-		return { title: "Website Not Found | Kiosk" };
+		return { title: "Website Not Found" };
 	}
 
 	let parsed: TenantContentData = {};
@@ -74,9 +74,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 	const businessName = parsed.businessName || tenant.name || "Business Website";
 	const tagline = parsed.tagline || "Official Online Store & Services";
+	const brandColor = (parsed.primaryColor || "#004ac6").replace("#", "%23");
 	const faviconUrl =
 		parsed.logoImage?.url ||
-		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23004ac6'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
+		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='${brandColor}'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
 
 	return {
 		title: `${businessName} | ${tagline}`,
@@ -112,7 +113,7 @@ export default async function TenantSubdomainPage({ params }: PageProps) {
 					<Link
 						href="https://kioosk.online"
 						className="inline-block px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors">
-						Claim This Domain on Kiosk
+						Claim This Domain
 					</Link>
 				</div>
 			</div>
@@ -127,9 +128,10 @@ export default async function TenantSubdomainPage({ params }: PageProps) {
 	}
 
 	const businessName = parsedContent.businessName || tenant.name || cleanSlug;
+	const brandColor = (parsedContent.primaryColor || "#004ac6").replace("#", "%23");
 	const faviconUrl =
 		parsedContent.logoImage?.url ||
-		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23004ac6'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
+		`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='${brandColor}'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'>${encodeURIComponent(businessName.trim().charAt(0).toUpperCase() || "W")}</text></svg>`;
 
 	// Check if plan has been terminated or suspended at the end of the subscription period
 	const isPlanTerminated =

@@ -88,8 +88,13 @@ export async function middleware(request: NextRequest) {
 	// ---------------------------------------------------------------------------
 	const currentHost = hostname.replace(/:\d+$/, ""); // Strip port if present
 	const isRootDomain = ROOT_DOMAINS.includes(currentHost);
+	const isInternalOrApiRoute =
+		pathname.startsWith("/api") ||
+		pathname.startsWith("/tenants") ||
+		pathname.startsWith("/domains") ||
+		pathname.startsWith("/_next");
 
-	if (!isRootDomain) {
+	if (!isRootDomain && !isInternalOrApiRoute) {
 		// Scenario A: Subdomain format (e.g. "bella-bakery.kioosk.online" or "bella-bakery.localhost")
 		if (
 			currentHost.endsWith(".kioosk.online") ||
@@ -104,9 +109,10 @@ export async function middleware(request: NextRequest) {
 				);
 			}
 		} else {
-			// Scenario B: Custom domain format (e.g. "bellabakery.com")
+			// Scenario B: Custom domain format (e.g. "bellabakery.com" or "www.bellabakery.com")
+			const cleanCustomHost = currentHost.replace(/^www\./, "");
 			return NextResponse.rewrite(
-				new URL(`/domains/${currentHost}${pathname}`, request.url),
+				new URL(`/domains/${cleanCustomHost}${pathname}`, request.url),
 			);
 		}
 	}

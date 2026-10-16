@@ -244,11 +244,18 @@ export default function TenantLiveSite({
 	})();
 
 	// Format WhatsApp URL with customized pre-filled message
-	const cleanWhatsApp = (content.whatsappNumber || content.contactPhone || "").replace(/[^0-9]/g, "");
+	const cleanWhatsApp = (
+		content.whatsappNumber ||
+		content.whatsappLink ||
+		content.contactPhone ||
+		""
+	).replace(/[^0-9]/g, "");
 	const waLink = cleanWhatsApp
 		? `https://wa.me/${cleanWhatsApp}?text=${encodeURIComponent(
 				`Hello ${businessName}, I am reaching out from your website regarding your offerings.`,
 		  )}`
+		: content.whatsappLink?.startsWith("http")
+		? content.whatsappLink
 		: null;
 
 	const handleInquirySubmit = (e: React.FormEvent) => {
@@ -1459,14 +1466,8 @@ export default function TenantLiveSite({
 					</p>
 
 					<div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400">
-						<span>Powered by</span>
-						<a
-							href="https://kioosk.online"
-							target="_blank"
-							rel="noreferrer"
-							className="text-blue-600 hover:underline">
-							Kiosk
-						</a>
+						<ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+						<span>Verified Secure Business</span>
 					</div>
 				</div>
 			</footer>
