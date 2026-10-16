@@ -79,14 +79,17 @@ function normalizeContentForLiveSite(contentData: any, tenantSlug: string, tenan
 		);
 
 	const products = hasCustomProducts
-		? contentData.products.map((p: any) => ({
-				name: p.name,
-				price: typeof p.price === "number" ? `$${p.price}` : String(p.price || "$0"),
-				description: p.description || "",
-				image: p.imageUrl || p.image || "",
-				category: p.category || "General",
-				badge: p.badge || "",
-		  }))
+		? contentData.products.map((p: any) => {
+				const imgUrl = (p.imageUrl || p.image || "").trim();
+				return {
+					name: p.name,
+					price: typeof p.price === "number" ? `$${p.price}` : String(p.price || "$0"),
+					description: p.description || "",
+					image: imgUrl.startsWith("blob:") ? "" : imgUrl,
+					category: p.category || "General",
+					badge: p.badge || "",
+				};
+		  })
 		: blueprint.products;
 
 	// Check if testimonials are generic
@@ -99,7 +102,10 @@ function normalizeContentForLiveSite(contentData: any, tenantSlug: string, tenan
 		);
 
 	const testimonials = hasCustomTestimonials
-		? contentData.testimonialsList
+		? contentData.testimonialsList.map((t: any) => ({
+				...t,
+				avatarUrl: (t.avatarUrl || "").startsWith("blob:") ? "" : t.avatarUrl,
+		  }))
 		: blueprint.testimonials;
 
 	// Check if FAQs are generic
@@ -112,8 +118,22 @@ function normalizeContentForLiveSite(contentData: any, tenantSlug: string, tenan
 
 	const faqs = hasCustomFaqs ? contentData.faqs : blueprint.faqs;
 
+	// Clean out dead blob URLs from uploadedImages and logoImage
+	const logoImage =
+		contentData.logoImage?.url && !contentData.logoImage.url.startsWith("blob:")
+			? contentData.logoImage
+			: null;
+
+	const uploadedImages = Array.isArray(contentData.uploadedImages)
+		? contentData.uploadedImages.filter(
+				(img: any) => img?.url && !img.url.startsWith("blob:"),
+		  )
+		: [];
+
 	return {
 		...contentData,
+		logoImage,
+		uploadedImages,
 		businessName,
 		tagline: tagline || blueprint.tagline,
 		category: contentData.category || blueprint.category,

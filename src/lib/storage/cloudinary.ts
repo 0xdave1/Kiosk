@@ -66,6 +66,10 @@ export async function uploadToCloudinary(
 		formData.append("file", fileInput);
 	} else if (fileInput instanceof Blob) {
 		formData.append("file", fileInput);
+	} else if (Buffer.isBuffer(fileInput)) {
+		const mimeType = options.resourceType === "raw" ? "application/octet-stream" : "image/jpeg";
+		const base64 = `data:${mimeType};base64,${fileInput.toString("base64")}`;
+		formData.append("file", base64);
 	} else {
 		const blob = new Blob([new Uint8Array(fileInput)]);
 		formData.append("file", blob);

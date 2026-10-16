@@ -129,6 +129,7 @@ function ContentForm() {
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [uploadingCount, setUploadingCount] = useState(0);
 
 	// Theme Mode State (Light vs Dark Mode)
 	const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
@@ -412,8 +413,8 @@ function ContentForm() {
 		if (!file) return;
 		const url = URL.createObjectURL(file);
 		handleUpdateProduct(id, "imageUrl", url);
+		setUploadingCount((c) => c + 1);
 
-		// Background upload to Cloudinary
 		try {
 			const formData = new FormData();
 			formData.append("file", file);
@@ -424,14 +425,22 @@ function ContentForm() {
 				body: formData,
 			});
 
-			if (res.ok) {
-				const data = await res.json();
-				if (data.file?.url) {
-					handleUpdateProduct(id, "imageUrl", data.file.url);
-				}
+			const data = await res.json();
+			if (res.ok && data.file?.url) {
+				handleUpdateProduct(id, "imageUrl", data.file.url);
+			} else {
+				handleUpdateProduct(id, "imageUrl", "");
+				alert(data.error || "Failed to upload product photo. Please try a smaller image.");
 			}
 		} catch (err) {
-			console.warn("[PRODUCT_IMAGE_CLOUDINARY_UPLOAD_FALLBACK]", err);
+			console.error("[PRODUCT_IMAGE_CLOUDINARY_UPLOAD_ERROR]", err);
+			handleUpdateProduct(id, "imageUrl", "");
+			alert("Network error while uploading product photo. Please check your connection.");
+		} finally {
+			setUploadingCount((c) => Math.max(0, c - 1));
+			try {
+				URL.revokeObjectURL(url);
+			} catch (e) {}
 		}
 	};
 
@@ -535,7 +544,11 @@ function ContentForm() {
 
 				// E-commerce Fields & Products
 				if (Array.isArray(merged.products) && merged.products.length > 0) {
-					setProducts(merged.products);
+					const sanitizedProducts = merged.products.map((p: any) => ({
+						...p,
+						imageUrl: (p.imageUrl || "").startsWith("blob:") ? "" : p.imageUrl,
+					}));
+					setProducts(sanitizedProducts);
 				}
 				if (merged.currency) setCurrency(merged.currency);
 				if (merged.shippingInfo) setShippingInfo(merged.shippingInfo);
@@ -555,11 +568,14 @@ function ContentForm() {
 				if (merged.bookingLink) setBookingLink(merged.bookingLink);
 				if (merged.customLink) setCustomLink(merged.customLink);
 
-				if (merged.logoImage) {
+				if (merged.logoImage && !merged.logoImage.url?.startsWith("blob:")) {
 					setLogoImage(merged.logoImage);
 				}
 				if (Array.isArray(merged.uploadedImages)) {
-					setUploadedImages(merged.uploadedImages);
+					const cleanImages = merged.uploadedImages.filter(
+						(img: any) => img?.url && !img.url.startsWith("blob:"),
+					);
+					setUploadedImages(cleanImages);
 				}
 			} catch (err) {
 				console.error("[LOAD_CONTENT_ERROR]", err);
@@ -674,6 +690,7 @@ function ContentForm() {
 			url: objectUrl,
 		};
 		setLogoImage(newLogo);
+		setUploadingCount((c) => c + 1);
 
 		// Background upload to Cloudinary
 		try {
@@ -686,14 +703,22 @@ function ContentForm() {
 				body: formData,
 			});
 
-			if (res.ok) {
-				const data = await res.json();
-				if (data.file?.url) {
-					setLogoImage((prev) => (prev?.id === tempId ? { ...prev, url: data.file.url } : prev));
-				}
+			const data = await res.json();
+			if (res.ok && data.file?.url) {
+				setLogoImage((prev) => (prev?.id === tempId ? { ...prev, url: data.file.url } : prev));
+			} else {
+				setLogoImage(null);
+				alert(data.error || "Failed to upload logo image. Please check file format and size.");
 			}
 		} catch (uploadErr) {
-			console.warn("[LOGO_CLOUDINARY_UPLOAD_FALLBACK]", uploadErr);
+			console.error("[LOGO_CLOUDINARY_UPLOAD_ERROR]", uploadErr);
+			setLogoImage(null);
+			alert("Network error while uploading brand logo. Please try again.");
+		} finally {
+			setUploadingCount((c) => Math.max(0, c - 1));
+			try {
+				URL.revokeObjectURL(objectUrl);
+			} catch (e) {}
 		}
 	};
 
@@ -718,6 +743,7 @@ function ContentForm() {
 				url: objectUrl,
 			};
 			setUploadedImages((prev) => [...prev, newImage]);
+			setUploadingCount((c) => c + 1);
 
 			// Background upload to Cloudinary
 			try {
@@ -730,16 +756,24 @@ function ContentForm() {
 					body: formData,
 				});
 
-				if (res.ok) {
-					const data = await res.json();
-					if (data.file?.url) {
-						setUploadedImages((prev) =>
-							prev.map((img) => (img.id === tempId ? { ...img, url: data.file.url } : img)),
-						);
-					}
+				const data = await res.json();
+				if (res.ok && data.file?.url) {
+					setUploadedImages((prev) =>
+						prev.map((img) => (img.id === tempId ? { ...img, url: data.file.url } : img)),
+					);
+				} else {
+					setUploadedImages((prev) => prev.filter((img) => img.id !== tempId));
+					alert(`Failed to upload ${file.name}: ${data.error || "Please try again"}`);
 				}
 			} catch (uploadErr) {
-				console.warn("[BRAND_FILE_CLOUDINARY_UPLOAD_FALLBACK]", uploadErr);
+				console.error("[BRAND_FILE_CLOUDINARY_UPLOAD_ERROR]", uploadErr);
+				setUploadedImages((prev) => prev.filter((img) => img.id !== tempId));
+				alert(`Network error while uploading ${file.name}`);
+			} finally {
+				setUploadingCount((c) => Math.max(0, c - 1));
+				try {
+					URL.revokeObjectURL(objectUrl);
+				} catch (e) {}
 			}
 		});
 	};
@@ -755,8 +789,25 @@ function ContentForm() {
 			return;
 		}
 
+		if (uploadingCount > 0) {
+			alert("Please wait for all image uploads to finish before submitting.");
+			return;
+		}
+
 		try {
 			setIsSubmitting(true);
+
+			// Sanitize images to ensure zero broken blob: URLs reach the database
+			const sanitizedLogo =
+				logoImage && !logoImage.url.startsWith("blob:") ? logoImage : null;
+			const sanitizedUploadedImages = uploadedImages.filter(
+				(img) => img?.url && !img.url.startsWith("blob:"),
+			);
+			const sanitizedProducts = products.map((p) => ({
+				...p,
+				imageUrl: (p.imageUrl || "").startsWith("blob:") ? "" : p.imageUrl,
+			}));
+
 			const payload = {
 				projectId,
 				plan: activePlan,
@@ -784,7 +835,7 @@ function ContentForm() {
 				orderBumpDescription,
 				guaranteeText,
 				// E-Commerce
-				products,
+				products: sanitizedProducts,
 				currency,
 				shippingInfo,
 				themeMode,
@@ -797,8 +848,8 @@ function ContentForm() {
 				tiktokLink,
 				bookingLink,
 				customLink,
-				logoImage,
-				uploadedImages,
+				logoImage: sanitizedLogo,
+				uploadedImages: sanitizedUploadedImages,
 			};
 
 			const res = await fetch("/api/projects/content", {
@@ -2232,7 +2283,7 @@ function ContentForm() {
 
 							<PillButton
 								type="submit"
-								disabled={isSubmitting}
+								disabled={isSubmitting || uploadingCount > 0}
 								baseColor="#004ac6"
 								circleColor="#ffffff"
 								textColor="#ffffff"
@@ -2243,6 +2294,11 @@ function ContentForm() {
 									<span className="inline-flex items-center gap-2">
 										<Loader2 className="w-4 h-4 animate-spin" />
 										<span>Submitting to Fulfillment Team...</span>
+									</span>
+								) : uploadingCount > 0 ? (
+									<span className="inline-flex items-center gap-2">
+										<Loader2 className="w-4 h-4 animate-spin" />
+										<span>Uploading Media ({uploadingCount})...</span>
 									</span>
 								) : (
 									<span className="inline-flex items-center gap-2">

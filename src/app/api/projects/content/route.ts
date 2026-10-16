@@ -191,6 +191,23 @@ export async function POST(request: Request) {
 		}
 
 		const contentData = validation.data;
+
+		// Server-side guard: Strip any dead blob: URLs before saving to cache, DB, or background builders
+		if (contentData.logoImage?.url?.startsWith("blob:")) {
+			contentData.logoImage = null;
+		}
+		if (Array.isArray(contentData.uploadedImages)) {
+			contentData.uploadedImages = contentData.uploadedImages.filter(
+				(img) => img?.url && !img.url.startsWith("blob:"),
+			);
+		}
+		if (Array.isArray(contentData.products)) {
+			contentData.products = contentData.products.map((p) => ({
+				...p,
+				imageUrl: (p.imageUrl || "").startsWith("blob:") ? "" : p.imageUrl,
+			}));
+		}
+
 		const projectId = contentData.projectId;
 
 		const cacheKey = projectId

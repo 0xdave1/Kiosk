@@ -20,7 +20,7 @@ const EMAIL_FROM = process.env.EMAIL_FROM || "Kiosk <noreply@kioosk.online>";
 /**
  * Resolves the active base application URL across local dev, preview branches, and production.
  */
-function getAppUrl(): string {
+export function getAppUrl(): string {
 	if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
 	if (process.env.AUTH_URL) return process.env.AUTH_URL.replace(/\/$/, "");
 	if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`.replace(/\/$/, "");
@@ -41,27 +41,55 @@ export async function sendEmail({
 	subject,
 	html,
 }: SendEmailPayload): Promise<{ success: boolean; id?: string; error?: string }> {
-	if (!RESEND_API_KEY) {
+	const apiKey = process.env.RESEND_API_KEY || RESEND_API_KEY;
+	const fromAddress = process.env.EMAIL_FROM || EMAIL_FROM || "Kiosk <noreply@kioosk.online>";
+
+	if (!apiKey) {
 		console.log(`[EMAIL_DEV_FALLBACK] To: ${to} | Subject: ${subject}`);
 		return { success: true, id: `dev_mock_${crypto.randomUUID().slice(0, 8)}` };
 	}
 
 	try {
-		const res = await fetch("https://api.resend.com/emails", {
+		let res = await fetch("https://api.resend.com/emails", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				Authorization: `Bearer ${RESEND_API_KEY}`,
+				Authorization: `Bearer ${apiKey}`,
 			},
 			body: JSON.stringify({
-				from: EMAIL_FROM,
+				from: fromAddress,
 				to: [to],
 				subject,
 				html,
 			}),
 		});
 
-		const data = await res.json();
+		let data = await res.json();
+
+		// If rejected due to domain not being verified in Resend, automatically fallback to onboarding@resend.dev
+		if (
+			!res.ok &&
+			(data.name === "validation_error" ||
+				data.message?.toLowerCase().includes("domain") ||
+				data.message?.toLowerCase().includes("verify") ||
+				data.message?.toLowerCase().includes("not verified"))
+		) {
+			console.warn("[RESEND_FALLBACK_TO_ONBOARDING]", data.message);
+			res = await fetch("https://api.resend.com/emails", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${apiKey}`,
+				},
+				body: JSON.stringify({
+					from: "Kiosk <onboarding@resend.dev>",
+					to: [to],
+					subject,
+					html,
+				}),
+			});
+			data = await res.json();
+		}
 
 		if (!res.ok) {
 			console.error("[RESEND_API_ERROR]", data);
@@ -69,9 +97,9 @@ export async function sendEmail({
 		}
 
 		return { success: true, id: data.id };
-	} catch (err) {
+	} catch (err: any) {
 		console.error("[EMAIL_DISPATCH_EXCEPTION]", err);
-		return { success: false, error: "Unexpected network error during email dispatch" };
+		return { success: false, error: err?.message || "Unexpected network error during email dispatch" };
 	}
 }
 

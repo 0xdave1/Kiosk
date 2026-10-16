@@ -6,7 +6,7 @@ import { users, verificationTokens } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { forgotPasswordSchema } from "@/lib/auth/password";
 import { checkRateLimit } from "@/lib/ratelimit";
-import { sendPasswordResetEmail } from "@/lib/email";
+import { sendPasswordResetEmail, getAppUrl } from "@/lib/email";
 
 export async function POST(request: Request) {
 	try {
@@ -70,21 +70,28 @@ export async function POST(request: Request) {
 				expires,
 			});
 
-			// Build reset URL
-			const appUrl =
-				process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+			// Build reset URL using dynamic origin or appUrl
+			const reqHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
+			const reqProto = request.headers.get("x-forwarded-proto") || (reqHost?.includes("localhost") ? "http" : "https");
+			const detectedUrl = reqHost ? `${reqProto}://${reqHost}` : null;
+			const appUrl = (process.env.NEXT_PUBLIC_APP_URL || detectedUrl || getAppUrl()).replace(/\/$/, "");
 			const resetUrl = `${appUrl}/reset-password?token=${encodeURIComponent(
 				resetToken,
 			)}&email=${encodeURIComponent(email)}`;
 
-			// Dispatch email asynchronously
-			sendPasswordResetEmail({
-				toEmail: email,
-				userName: user.name || "Kiosk User",
-				resetUrl,
-			}).catch((err) => {
+			// Await email dispatch to ensure execution completes in serverless environments
+			try {
+				const emailResult = await sendPasswordResetEmail({
+					toEmail: email,
+					userName: user.name || "Kiosk User",
+					resetUrl,
+				});
+				if (!emailResult.success) {
+					console.error("[PASSWORD_RESET_EMAIL_SEND_FAILED]", emailResult.error);
+				}
+			} catch (err) {
 				console.error("[PASSWORD_RESET_EMAIL_ERROR]", err);
-			});
+			}
 		}
 
 		// Generic safe response to prevent user enumeration attacks

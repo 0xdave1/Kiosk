@@ -135,7 +135,10 @@ export default function TenantLiveSite({
 
 	const businessName = content.businessName || "My Business";
 	const tagline = content.tagline || "Quality Services & Products Tailored For You";
-	const heroImage = content.uploadedImages?.[0]?.url || null;
+	const heroImage =
+		content.uploadedImages?.[0]?.url && !content.uploadedImages[0].url.startsWith("blob:")
+			? content.uploadedImages[0].url
+			: null;
 
 	return (
 		<div
@@ -160,19 +163,26 @@ export default function TenantLiveSite({
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 					{/* Logo & Brand Name */}
 					<div className="flex items-center gap-3.5">
-						{content.logoImage?.url ? (
+						{content.logoImage?.url && !content.logoImage.url.startsWith("blob:") ? (
 							<img
 								src={content.logoImage.url}
 								alt={businessName}
 								className="h-10 w-auto max-w-[160px] object-contain rounded-lg"
+								onError={(e) => {
+									e.currentTarget.style.display = "none";
+									const fallback = e.currentTarget.parentElement?.querySelector(".logo-fallback") as HTMLElement;
+									if (fallback) fallback.style.display = "flex";
+								}}
 							/>
-						) : (
-							<div
-								style={{ backgroundColor: brandColor }}
-								className="w-10 h-10 rounded-xl text-white font-extrabold flex items-center justify-center text-lg shadow-sm">
-								{businessName.charAt(0).toUpperCase()}
-							</div>
-						)}
+						) : null}
+						<div
+							style={{
+								backgroundColor: brandColor,
+								display: content.logoImage?.url && !content.logoImage.url.startsWith("blob:") ? "none" : "flex",
+							}}
+							className="logo-fallback w-10 h-10 rounded-xl text-white font-extrabold items-center justify-center text-lg shadow-sm">
+							{businessName.charAt(0).toUpperCase()}
+						</div>
 						<div>
 							<h1 className="font-extrabold text-lg sm:text-xl tracking-tight leading-tight">
 								{businessName}
@@ -306,26 +316,32 @@ export default function TenantLiveSite({
 									src={heroImage}
 									alt={businessName}
 									className="w-full h-full object-cover"
+									onError={(e) => {
+										const container = e.currentTarget.parentElement;
+										if (container) container.style.display = "none";
+										const fallback = container?.nextElementSibling as HTMLElement;
+										if (fallback) fallback.style.display = "block";
+									}}
 								/>
 							</div>
-						) : (
+						) : null}
+						<div
+							style={{ display: heroImage ? "none" : "block" }}
+							className={`rounded-2xl p-8 sm:p-10 text-center space-y-4 border ${
+								isDarkMode
+									? "bg-slate-800/80 border-slate-700 text-white"
+									: "bg-gray-50 border-gray-200 text-gray-800"
+							}`}>
 							<div
-								className={`rounded-2xl p-8 sm:p-10 text-center space-y-4 border ${
-									isDarkMode
-										? "bg-slate-800/80 border-slate-700 text-white"
-										: "bg-gray-50 border-gray-200 text-gray-800"
-								}`}>
-								<div
-									style={{ backgroundColor: brandColor }}
-									className="w-16 h-16 rounded-2xl text-white font-extrabold flex items-center justify-center text-2xl mx-auto shadow-md">
-									{businessName.charAt(0).toUpperCase()}
-								</div>
-								<h3 className="font-extrabold text-xl">{businessName}</h3>
-								<p className="text-xs text-gray-500 max-w-xs mx-auto">
-									Serving clients with dedication, quality, and fast delivery.
-								</p>
+								style={{ backgroundColor: brandColor }}
+								className="w-16 h-16 rounded-2xl text-white font-extrabold flex items-center justify-center text-2xl mx-auto shadow-md">
+								{businessName.charAt(0).toUpperCase()}
 							</div>
-						)}
+							<h3 className="font-extrabold text-xl">{businessName}</h3>
+							<p className="text-xs text-gray-500 max-w-xs mx-auto">
+								Serving clients with dedication, quality, and fast delivery.
+							</p>
+						</div>
 					</div>
 				</div>
 			</section>
@@ -362,19 +378,29 @@ export default function TenantLiveSite({
 										: "bg-white border-gray-200 hover:border-blue-300"
 								} shadow-xs transition-all`}>
 								<div className="space-y-3">
-									{prod.image ? (
+									{prod.image && !prod.image.startsWith("blob:") ? (
 										<div className="rounded-2xl overflow-hidden aspect-video bg-gray-100 border border-gray-200">
 											<img
 												src={prod.image}
 												alt={prod.name}
 												className="w-full h-full object-cover"
+												onError={(e) => {
+													const parent = e.currentTarget.parentElement;
+													if (parent) parent.style.display = "none";
+													const fallback = parent?.nextElementSibling as HTMLElement;
+													if (fallback) fallback.style.display = "flex";
+												}}
 											/>
 										</div>
-									) : (
-										<div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center">
-											<ShoppingBag className="w-6 h-6" />
-										</div>
-									)}
+									) : null}
+									<div
+										style={{
+											display:
+												prod.image && !prod.image.startsWith("blob:") ? "none" : "flex",
+										}}
+										className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 items-center justify-center">
+										<ShoppingBag className="w-6 h-6" />
+									</div>
 
 									<div className="flex items-center gap-2">
 										<h4 className="font-extrabold text-base text-gray-900 dark:text-white">

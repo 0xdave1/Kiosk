@@ -10,12 +10,8 @@
 
 import { NextResponse } from "next/server";
 import { uploadToCloudinary } from "@/lib/storage/cloudinary";
-import { getAuthenticatedUser } from "@/lib/auth/session";
-import { auth } from "@/auth";
+import { getAuthenticatedTenantContext } from "@/lib/auth/session";
 import { checkRateLimit } from "@/lib/ratelimit";
-import { db } from "@/db";
-import { tenants } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
 	try {
@@ -28,21 +24,14 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Authenticate User
-		const authSession = await auth();
-		const customUser = await getAuthenticatedUser();
-		const userId = authSession?.user?.id || customUser?.id;
+		// Authenticate User & Tenant Context
+		const { user, tenant } = await getAuthenticatedTenantContext();
 
-		if (!userId) {
+		if (!user) {
 			return NextResponse.json({ error: "Unauthorized. Please sign in to upload files." }, { status: 401 });
 		}
 
-		// Resolve Multi-Tenant Workspace for folder partitioning
-		const tenant = await db.query.tenants.findFirst({
-			where: eq(tenants.ownerId, userId),
-		});
-
-		const tenantSlug = tenant?.slug || `user-${userId.slice(0, 8)}`;
+		const tenantSlug = tenant?.slug || `user-${user.id.slice(0, 8)}`;
 
 		const formData = await request.formData();
 		const file = formData.get("file") as File | null;
@@ -68,10 +57,13 @@ export async function POST(request: Request) {
 		const uniquePublicId = `${nameBase}_${Date.now()}_${crypto.randomUUID().slice(0, 6)}`;
 
 		const buffer = Buffer.from(await file.arrayBuffer());
-		const result = await uploadToCloudinary(buffer, {
+		const fileType = file.type || "image/jpeg";
+		const base64Data = `data:${fileType};base64,${buffer.toString("base64")}`;
+
+		const result = await uploadToCloudinary(base64Data, {
 			folder: isolatedFolder,
 			publicId: uniquePublicId,
-			resourceType: file.type.startsWith("image/") ? "image" : "raw",
+			resourceType: fileType.startsWith("image/") ? "image" : "raw",
 		});
 
 		return NextResponse.json(
