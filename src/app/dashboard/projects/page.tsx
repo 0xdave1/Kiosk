@@ -19,6 +19,7 @@ export default function ProjectsPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [activeFilter, setActiveFilter] = useState<FilterStatus>("All");
 	const [searchQuery, setSearchQuery] = useState("");
+	const [subscriptionUsage, setSubscriptionUsage] = useState<any>(null);
 
 	useEffect(() => {
 		async function fetchProjects() {
@@ -32,6 +33,10 @@ export default function ProjectsPage() {
 					setError(data.error || "Failed to load projects.");
 					setIsLoading(false);
 					return;
+				}
+
+				if (data.subscriptionUsage) {
+					setSubscriptionUsage(data.subscriptionUsage);
 				}
 
 				if (Array.isArray(data.projects)) {
@@ -110,24 +115,45 @@ export default function ProjectsPage() {
 				{/* Page Header */}
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-200/80 mb-8">
 					<div>
-						<h1 className="text-2xl sm:text-3xl font-bold font-nohemi text-gray-900 tracking-tight mb-1">
-							Projects
-						</h1>
+						<div className="flex items-center gap-3 mb-1">
+							<h1 className="text-2xl sm:text-3xl font-bold font-nohemi text-gray-900 tracking-tight">
+								Projects
+							</h1>
+							{subscriptionUsage && (
+								<span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+									subscriptionUsage.isLimitReached
+										? "bg-amber-50 text-amber-800 border-amber-200"
+										: "bg-blue-50 text-blue-700 border-blue-200"
+								}`}>
+									{subscriptionUsage.usedWebsites} of {subscriptionUsage.maxAllowedWebsites} Website{subscriptionUsage.maxAllowedWebsites !== 1 ? "s" : ""} Used (1 Sub per Site)
+								</span>
+							)}
+						</div>
 						<p className="text-gray-500 text-sm font-medium">
-							Manage and track all your active website projects.
+							Manage and track all your active website projects. Each subscription generates 1 website.
 						</p>
 					</div>
 
-					<PillButton
-						href="/dashboard/projects/new"
-						baseColor="#004ac6"
-						circleColor="#ffffff"
-						textColor="#ffffff"
-						hoverTextColor="#004ac6"
-						useThunderFont={true}
-						className="px-5 py-2.5 text-xs font-bold border border-blue-600 shadow-md">
-						+ New Project
-					</PillButton>
+					<div className="flex items-center gap-3">
+						{subscriptionUsage?.isLimitReached ? (
+							<Link
+								href="/checkout?plan=landing"
+								className="px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2">
+								<span>+ Add Website Subscription</span>
+							</Link>
+						) : (
+							<PillButton
+								href="/dashboard/projects/new"
+								baseColor="#004ac6"
+								circleColor="#ffffff"
+								textColor="#ffffff"
+								hoverTextColor="#004ac6"
+								useThunderFont={true}
+								className="px-5 py-2.5 text-xs font-bold border border-blue-600 shadow-md">
+								+ New Project
+							</PillButton>
+						)}
+					</div>
 				</div>
 
 				{/* Controls Bar: Search & Filter Tabs */}

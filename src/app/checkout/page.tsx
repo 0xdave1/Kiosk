@@ -221,6 +221,14 @@ function CheckoutContent() {
 					</div>
 				</div>
 
+				{/* 1 Subscription = 1 Website Policy Banner */}
+				<div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 text-blue-900 text-xs flex items-center gap-2 font-medium">
+					<CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+					<span>
+						<strong>Subscription Policy:</strong> 1 Subscription = 1 Website. Each subscription powers one live business website with full hosting and management.
+					</span>
+				</div>
+
 				{/* Billing Cycle & Currency Switchers */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					{/* Billing Toggle */}

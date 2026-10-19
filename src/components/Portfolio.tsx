@@ -13,6 +13,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import ScrollReveal from "./ScrollReveal";
 
 /* ── Project Data ─────────────────────────────────────── */
@@ -124,6 +125,16 @@ export default function Portfolio() {
 						<ProjectCard key={`${project.title}-${i}`} project={project} />
 					))}
 				</div>
+			</div>
+
+			{/* Explore All Launched Websites CTA */}
+			<div className="mt-12 text-center relative z-10">
+				<Link
+					href="/showcase"
+					className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 transition-all duration-200">
+					<span>Explore All Launched Websites</span>
+					<span>→</span>
+				</Link>
 			</div>
 		</section>
 	);

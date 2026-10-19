@@ -245,6 +245,35 @@ export async function POST(request: Request) {
 						updatedAt: new Date(),
 					})
 					.where(eq(projects.id, userProjects[0].id));
+			} else {
+				// Provision initial single website under this subscription
+				const projectSlug = contentData.businessName
+					.toLowerCase()
+					.replace(/[^a-z0-9]/g, "-")
+					.replace(/-+/g, "-")
+					.replace(/^-|-$/g, "");
+				const projectSubdomain = projectSlug || `site-${crypto.randomUUID().slice(0, 6)}`;
+				const planType =
+					contentData.plan === "E_COMMERCE"
+						? "E-commerce"
+						: contentData.plan === "SALES_FUNNEL"
+						? "Sales Funnel"
+						: "Landing Page";
+
+				const [createdProj] = await db
+					.insert(projects)
+					.values({
+						id: crypto.randomUUID(),
+						tenantId: tenant.id,
+						name: contentData.businessName,
+						type: planType,
+						status: "In Review",
+						progress: 85,
+						publishedUrl: `https://${projectSubdomain}.kioosk.online`,
+						content: JSON.stringify(contentData),
+					})
+					.returning();
+				targetProjectId = createdProj.id;
 			}
 		}
 

@@ -3,8 +3,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
-import { projects } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { projects, subscriptions } from "@/db/schema";
+import { eq, and, or } from "drizzle-orm";
 import { getAuthenticatedTenantContext } from "@/lib/auth/session";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { SiteTemplateFactory } from "@/lib/factory/SiteTemplateFactory";
@@ -19,7 +19,7 @@ const createProjectSchema = z.object({
 });
 
 /**
- * GET /api/projects - Returns list of projects for current user's tenant
+ * GET /api/projects - Returns list of projects for current user's tenant with subscription allowance
  */
 export async function GET(request: Request) {
 	try {
@@ -43,9 +43,32 @@ export async function GET(request: Request) {
 			orderBy: (p, { desc }) => [desc(p.createdAt)],
 		});
 
+		// Count active subscriptions for tenant
+		const activeSubs = await db.query.subscriptions.findMany({
+			where: and(
+				eq(subscriptions.tenantId, tenant.id),
+				or(eq(subscriptions.status, "active"), eq(subscriptions.status, "grace_period")),
+			),
+		});
+
+		// A tenant whose plan is set and billing status is ACTIVE has at least 1 subscription allowance
+		const hasActivePlan = tenant.plan !== "NONE" && tenant.billingStatus === "ACTIVE";
+		const maxAllowedWebsites = Math.max(activeSubs.length, hasActivePlan ? 1 : 0);
+		const isLimitReached = maxAllowedWebsites > 0 && tenantProjects.length >= maxAllowedWebsites;
+		const hasNoSubscription = maxAllowedWebsites === 0;
+
 		return NextResponse.json({
 			tenant,
 			projects: tenantProjects,
+			subscriptionUsage: {
+				usedWebsites: tenantProjects.length,
+				maxAllowedWebsites,
+				isLimitReached,
+				hasNoSubscription,
+				canCreateWebsite: !isLimitReached && !hasNoSubscription,
+				plan: tenant.plan,
+				billingStatus: tenant.billingStatus,
+			},
 		});
 	} catch (err) {
 		console.error("[GET_PROJECTS_ERROR]", err);
@@ -74,6 +97,45 @@ export async function POST(request: Request) {
 
 		if (!user || !tenant) {
 			return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
+		}
+
+		// 1. Verify active subscription status
+		const activeSubs = await db.query.subscriptions.findMany({
+			where: and(
+				eq(subscriptions.tenantId, tenant.id),
+				or(eq(subscriptions.status, "active"), eq(subscriptions.status, "grace_period")),
+			),
+		});
+
+		const hasActivePlan = tenant.plan !== "NONE" && tenant.billingStatus === "ACTIVE";
+		const maxAllowedWebsites = Math.max(activeSubs.length, hasActivePlan ? 1 : 0);
+
+		if (maxAllowedWebsites === 0) {
+			return NextResponse.json(
+				{
+					error: "An active subscription is required to generate a website. Please subscribe to a plan to launch your website.",
+					code: "NO_ACTIVE_SUBSCRIPTION",
+				},
+				{ status: 403 },
+			);
+		}
+
+		// 2. Enforce 1 subscription = 1 website limit
+		const existingProjects = await db.query.projects.findMany({
+			where: eq(projects.tenantId, tenant.id),
+		});
+
+		if (existingProjects.length >= maxAllowedWebsites) {
+			const existingProjectName = existingProjects[0]?.name || "your existing website";
+			return NextResponse.json(
+				{
+					error: `Subscription limit reached. An account can only use a subscription for one website, and one subscription cannot be used to generate multiple websites. Your subscription is currently tied to "${existingProjectName}". Please purchase an additional subscription to create another website.`,
+					code: "SUBSCRIPTION_LIMIT_REACHED",
+					usedWebsites: existingProjects.length,
+					maxAllowedWebsites,
+				},
+				{ status: 403 },
+			);
 		}
 
 		const body = await request.json();

@@ -45,7 +45,6 @@ export default function DashboardPage() {
 	const [isProfileOpen, setIsProfileOpen] = useState(false);
 	const [isNotifOpen, setIsNotifOpen] = useState(false);
 	const [isSupportOpen, setIsSupportOpen] = useState(false);
-	const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 	const [isRevisionOpen, setIsRevisionOpen] = useState(false);
 	const [isQuickEditOpen, setIsQuickEditOpen] = useState(false);
 	const [supportMessage, setSupportMessage] = useState("");
@@ -89,6 +88,7 @@ export default function DashboardPage() {
 
 	// Saved Business Content State
 	const [savedContent, setSavedContent] = useState<any | null>(null);
+	const [subscriptionUsage, setSubscriptionUsage] = useState<any | null>(null);
 
 	// Fetch real projects & content from API endpoints
 	useEffect(() => {
@@ -105,6 +105,7 @@ export default function DashboardPage() {
 					const data = await projRes.json();
 					setProjectsList(data.projects || []);
 					setTenantInfo(data.tenant || null);
+					setSubscriptionUsage(data.subscriptionUsage || null);
 				}
 
 				if (contentRes.ok) {
@@ -547,16 +548,25 @@ export default function DashboardPage() {
 						</h1>
 					</div>
 
-					<PillButton
-						href="/dashboard/projects/new"
-						baseColor="#004ac6"
-						circleColor="#ffffff"
-						textColor="#ffffff"
-						hoverTextColor="#004ac6"
-						useThunderFont={true}
-						className="px-6 py-2.5 text-xs font-bold border border-blue-600 shadow-sm self-start sm:self-auto">
-						+ New Project
-					</PillButton>
+					{subscriptionUsage?.isLimitReached ? (
+						<Link
+							href="/checkout?plan=landing"
+							className="px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 self-start sm:self-auto">
+							<Sparkles className="w-3.5 h-3.5" />
+							<span>+ Add Website Subscription</span>
+						</Link>
+					) : (
+						<PillButton
+							href="/dashboard/projects/new"
+							baseColor="#004ac6"
+							circleColor="#ffffff"
+							textColor="#ffffff"
+							hoverTextColor="#004ac6"
+							useThunderFont={true}
+							className="px-6 py-2.5 text-xs font-bold border border-blue-600 shadow-sm self-start sm:self-auto">
+							+ New Project
+						</PillButton>
+					)}
 				</div>
 
 				{/* Loading State */}
@@ -587,14 +597,6 @@ export default function DashboardPage() {
 												className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors cursor-pointer border border-indigo-200/60 shadow-2xs">
 												<Sparkles className="w-3.5 h-3.5 text-indigo-600" />
 												<span>Quick Edit</span>
-											</button>
-
-											<button
-												type="button"
-												onClick={() => setIsPreviewOpen(true)}
-												className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors cursor-pointer border border-blue-200/60">
-												<ExternalLink className="w-3.5 h-3.5" />
-												<span>Preview →</span>
 											</button>
 										</div>
 									</div>
@@ -706,9 +708,14 @@ export default function DashboardPage() {
 								<div>
 									<p className="text-2xl font-bold font-nohemi text-gray-900">
 										{projectsList.length}
+										{subscriptionUsage && (
+											<span className="text-xs font-semibold text-gray-400 font-sans ml-1">
+												/ {subscriptionUsage.maxAllowedWebsites}
+											</span>
+										)}
 									</p>
 									<p className="text-xs text-gray-500 font-medium">
-										{projectsList.length === 1 ? "Active Project" : "Active Projects"}
+										{projectsList.length === 1 ? "Active Website" : "Active Websites"} • 1 Sub/Site
 									</p>
 								</div>
 							</div>
@@ -1002,128 +1009,6 @@ export default function DashboardPage() {
 								</div>
 							</form>
 						)}
-					</div>
-				</div>
-			)}
-
-			{/* Preview Drawer / Modal */}
-			{isPreviewOpen && (
-				<div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 overflow-y-auto pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
-					<div className="w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] max-h-[92dvh]">
-						{/* Top Control Bar */}
-						<div className="px-6 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between gap-4">
-							<div className="flex items-center gap-3">
-								<div className="w-3 h-3 rounded-full bg-red-500" />
-								<div className="w-3 h-3 rounded-full bg-amber-500" />
-								<div className="w-3 h-3 rounded-full bg-emerald-500" />
-								<span className="text-xs font-mono font-bold text-slate-400 ml-2 truncate max-w-[200px] sm:max-w-xs">
-									{activeProject?.publishedUrl || "https://preview.kioosk.online"}
-								</span>
-							</div>
-
-							<button
-								type="button"
-								onClick={() => setIsPreviewOpen(false)}
-								className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
-								<X className="w-5 h-5" />
-							</button>
-						</div>
-
-						{/* Live Interactive Site Render Window */}
-						<div className="flex-1 overflow-y-auto bg-slate-950 p-4 sm:p-8 flex items-center justify-center">
-							{/* Dynamically Load User's Selected Google Font */}
-							<link
-								rel="stylesheet"
-								href={`https://fonts.googleapis.com/css2?family=${(savedContent?.selectedFont || "Outfit").replace(/\s+/g, "+")}:wght@400;600;700;800&display=swap`}
-							/>
-
-							<div
-								style={{ fontFamily: `'${savedContent?.selectedFont || "Outfit"}', sans-serif` }}
-								className="w-full min-h-[550px] bg-white text-slate-900 rounded-2xl overflow-hidden shadow-2xl">
-								{/* RENDER: Site Navbar */}
-								<header className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
-									<div className="flex items-center gap-2.5">
-										{savedContent?.uploadedImages && savedContent.uploadedImages.length > 0 ? (
-											<img
-												src={savedContent.uploadedImages[0].url}
-												alt="Logo"
-												className="w-7 h-7 rounded-lg object-cover border border-gray-200"
-											/>
-										) : (
-											<div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
-												{(savedContent?.businessName || activeProject?.name || "K")[0]}
-											</div>
-										)}
-										<span className="font-bold text-sm text-gray-900 font-nohemi">
-											{savedContent?.businessName || activeProject?.name || "My Business"}
-										</span>
-									</div>
-
-									<button className="px-4 py-1.5 rounded-full bg-blue-600 text-white text-xs font-bold">
-										Contact Us
-									</button>
-								</header>
-
-								{/* RENDER: Hero Section */}
-								<div className="relative bg-slate-900 text-white py-16 px-6 text-center overflow-hidden">
-									{savedContent?.uploadedImages && savedContent.uploadedImages.length > 0 && (
-										<div className="absolute inset-0 z-0">
-											<img
-												src={savedContent.uploadedImages[0].url}
-												alt="Hero Background"
-												className="w-full h-full object-cover opacity-30 blur-xs"
-											/>
-										</div>
-									)}
-
-									<div className="relative z-10 max-w-xl mx-auto space-y-4">
-										<span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-extrabold uppercase tracking-wider border border-blue-500/30">
-											Official Website
-										</span>
-										<h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight font-nohemi leading-tight">
-											{savedContent?.tagline || "High-Converting Custom Website"}
-										</h1>
-										<p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed max-w-md mx-auto">
-											{savedContent?.aboutText || "Professional online presence tailored for your business."}
-										</p>
-									</div>
-								</div>
-
-								{/* RENDER: Services Section */}
-								<div className="py-12 px-6 bg-slate-50">
-									<div className="max-w-md mx-auto text-center mb-8">
-										<h2 className="text-lg font-bold font-nohemi text-gray-900 mb-1">
-											Key Offers & Services
-										</h2>
-									</div>
-
-									<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
-										{(savedContent?.servicesList || "1. Consulting\n2. Solutions\n3. Support")
-											.split("\n")
-											.map((svc: string, i: number) => (
-												<div
-													key={i}
-													className="p-4 rounded-xl bg-white border border-gray-200/80 shadow-2xs">
-													<div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold mb-2">
-														{i + 1}
-													</div>
-													<p className="text-xs font-bold text-gray-900">{svc}</p>
-												</div>
-											))}
-									</div>
-								</div>
-
-								{/* RENDER: Contact Footer */}
-								<footer className="py-8 px-6 bg-white border-t border-gray-100 text-center text-xs text-gray-500 space-y-2">
-									<p className="font-bold text-gray-900">
-										{savedContent?.businessName || activeProject?.name}
-									</p>
-									<p className="text-[11px] text-gray-600">
-										Email: {savedContent?.contactEmail || "contact@kioosk.online"} | Phone: {savedContent?.contactPhone || "+1 (555) 019-2834"}
-									</p>
-								</footer>
-							</div>
-						</div>
 					</div>
 				</div>
 			)}

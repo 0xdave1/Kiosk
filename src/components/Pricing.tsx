@@ -217,6 +217,9 @@ export default function Pricing() {
 					{/* Top Header & Toggle */}
 					<div className="w-full flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-6 border-b border-white/10 pb-4 sm:pb-5 shrink-0 relative z-20">
 						<div>
+							<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[11px] font-bold uppercase tracking-wider mb-2">
+								<span>1 Subscription = 1 Website Dedicated Hosting</span>
+							</div>
 							<h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white font-nohemi uppercase">
 								SIMPLE PRICING.{" "}
 								<span className="text-blue-400">ZERO SURPRISES.</span>
