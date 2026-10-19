@@ -16,7 +16,8 @@ A website builder forces the customer to do the heavy lifting: drag-and-drop can
 
 Small business owners choose Kiosk over Wix, Shopify, or Bumpa specifically because they **do not want to sit down and build a website themselves**.
 
-### The Kiosk Workflow:
+### The Kiosk Workflow
+
 1. **Submit Info (5 Minutes)**: The business owner fills out a structured intake form (Business Name, Tagline, Story, Offerings/Products, Logo, Brand Photos, Contact, WhatsApp).
 2. **Operations Fulfillment & QA**: The Kiosk team reviews submissions in the Admin Studio (`/admin/projects/[id]`), tests links, assigns domains, and clicks **Publish**.
 3. **Dynamic Multi-Tenant Rendering**: Visiting `https://<business>.kioosk.online` dynamically pulls the client's persisted data from PostgreSQL and renders a responsive, high-converting live website with 1-click WhatsApp checkout.
@@ -29,6 +30,7 @@ Small business owners choose Kiosk over Wix, Shopify, or Bumpa specifically beca
 ## Client Dashboard (`/dashboard`)
 
 Logged-in clients access a sleek, professional dashboard featuring:
+
 - **Project Tracking & Management (`/dashboard/projects`)**: Monitor real-time project progress for their specific tenant workspace.
 - **Website Intake Studio (`/dashboard/content`)**: Streamlined form supporting Light/Dark themes, Cloudinary media uploads, product catalog pricing, and direct WhatsApp contact configuration.
 - **Templates Directory (`/dashboard/templates`)**: Direct dock access to industry-specific templates.
@@ -41,6 +43,7 @@ Logged-in clients access a sleek, professional dashboard featuring:
 ## Master Admin Operations Backoffice (`/admin`)
 
 Operations and fulfillment center for the Kiosk team:
+
 - **Bento Grid Operations Hub (`/admin`)**: Real-time KPI metrics (Queue, Builds In Progress, Live Sites, Revenue).
 - **Fulfillment Queue (`/admin/projects`)**: Filter, search, and inspect customer intake submissions with real customer profile avatars and revision management.
 - **Fulfillment & Launch Studio (`/admin/projects/[id]`)**: Full brand assets review, published domain assignment, and 1-click **"Publish Website & Email Client Launch Notification"**.
@@ -51,6 +54,7 @@ Operations and fulfillment center for the Kiosk team:
 ## Multi-Tenant Subdomain & Brand Isolation
 
 Client sites hosted on Kiosk receive 100% brand isolation:
+
 - **Dynamic Client Favicon**: Client subdomains and custom domains serve the tenant's brand logo (or custom SVG monogram) as their favicon, never the Kiosk logo.
 - **Client Branded Preloader**: Live sites render a smooth loading screen featuring the client's own logo.
 - **Cinematic Under Construction Screen**: Unpublished subdomains (`DRAFT` / `IN_REVIEW`) display an ambient, animated status screen with progress tracking and direct WhatsApp inquiry buttons.

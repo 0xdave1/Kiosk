@@ -12,7 +12,7 @@
 
 ## High-Level System Architecture
 
-```
+```text
                   ┌──────────────────────────────────────────────┐
                   │                 User Client                  │
                   │         (Modern Web Browser / Mobile)        │
@@ -119,4 +119,3 @@
 - Input validation on onboarding and project wizard forms via Zod schemas.
 - Neon PostgreSQL database with PgBouncer connection pooling.
 - Transport Layer Security (TLS 1.3) across all endpoints.
-

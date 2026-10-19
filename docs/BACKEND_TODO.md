@@ -24,6 +24,7 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 ---
 
 ## Phase 1: Authentication & Authorization Engine
+
 - [x] Core schema in `src/db/schema.ts` (`users`, `accounts`, `sessions`, `verificationTokens`).
 - [x] Edge middleware protection in `src/middleware.ts` guarding `/dashboard/*`, `/checkout`, and `/admin/*`.
 - [x] Dual-session authentication (Custom secure HTTP-only cookies + Auth.js Google OAuth).
@@ -33,6 +34,7 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 ---
 
 ## Phase 2: Multi-Tenant Architecture & Media Storage
+
 - [x] `tenants` and `projects` tables in `src/db/schema.ts`.
 - [x] Edge Subdomain Rewriter in `src/middleware.ts` (`<tenant>.kioosk.online` -> `/tenants/[slug]`).
 - [x] Custom Domain Rewriter (`<customdomain.com>` -> `/domains/[domain]`).
@@ -46,6 +48,7 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 ---
 
 ## Phase 3: Operations & Fulfillment Backoffice (`/admin`)
+
 - [x] RBAC security module (`src/lib/auth/admin.ts`) guarding all `/admin/*` pages and `/api/admin/*` routes.
 - [x] Master Admin Bento Grid Dashboard (`/admin/page.tsx`) with real-time database KPIs.
 - [x] Fulfillment Queue (`/admin/projects/page.tsx`) with search and status filters.
@@ -63,6 +66,7 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 ---
 
 ## Phase 4: Transactional Email Notification System (`src/lib/email.ts`)
+
 - [x] Admin Intake Alert: Instant notification to `kioskonline3@gmail.com` with review link.
 - [x] Client Intake Receipt: Confirmation email acknowledging submission.
 - [x] Website Live Celebration Email: Dispatched to client with live URL when admin publishes.
@@ -73,6 +77,7 @@ This technical roadmap defines the completed and ongoing enterprise backend arch
 ---
 
 ## Phase 5: Payment Gateway & Subscriptions
+
 - [x] Bachs Multi-Plan Subscription Integration (3 tiers x 2 cycles).
 - [x] Bachs Webhook Handler (`/api/webhooks/bachs`) with HMAC-SHA256 signature verification.
 - [x] Production security: strict requirement for `BACHS_SECRET_KEY` and removal of mock bypasses in production.

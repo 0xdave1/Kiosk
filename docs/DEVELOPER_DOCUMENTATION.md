@@ -18,7 +18,7 @@ cd kiosk
 npm install
 ```
 
-2. Configure local environment variables in `.env.local`:
+1. Configure local environment variables in `.env.local`:
 
 ```env
 NEXT_PUBLIC_APP_URL="https://kioosk.online"
@@ -34,13 +34,13 @@ BACHS_SECRET_KEY="sk_live_..."
 BACHS_WEBHOOK_SECRET="whsec_..."
 ```
 
-3. Start the development server:
+1. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-4. Open http://localhost:3000 to view the application.
+1. Open `http://localhost:3000` to view the application.
 
 ---
 
@@ -60,7 +60,7 @@ npm run dev
 
 ## Architecture & Application Routes
 
-```
+```text
 src/
 ├── app/
 │   ├── layout.tsx              # Root marketing layout with NavbarWrapper
@@ -158,4 +158,5 @@ To ensure client sites maintain their unique brand identity and never leak Kiosk
 ## Payment Gateway & Webhook Infrastructure
 
 Kiosk integrates with Bachs.io:
+
 - **Bachs (`/api/webhooks/bachs`)**: HMAC-SHA256 signature verification via `x-bachs-signature` and timestamp freshness checks, strict production secret requirement, transaction verification, automated tenant billing activation, and async invoice PDF generation.

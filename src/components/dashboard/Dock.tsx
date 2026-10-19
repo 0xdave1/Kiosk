@@ -60,15 +60,23 @@ function DockItem({
       x: 0,
       width: baseItemSize
     };
-    return val - rect.x - baseItemSize / 2;
+    return val - (rect.x + (rect.width || baseItemSize) / 2);
   });
 
   const targetSize = useTransform(mouseDistance, [-distance, 0, distance], [baseItemSize, magnification, baseItemSize]);
   const size = useSpring(targetSize, spring);
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    isHovered.set(0);
+    ref.current?.blur();
+    onClick?.();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
+      isHovered.set(0);
+      ref.current?.blur();
       onClick?.();
     }
   };
@@ -84,9 +92,9 @@ function DockItem({
       onHoverEnd={() => isHovered.set(0)}
       onFocus={() => isHovered.set(1)}
       onBlur={() => isHovered.set(0)}
-      onClick={onClick}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className={`relative inline-flex items-center justify-center rounded-full bg-white border-gray-200 border-2 shadow-md ${className}`}
+      className={`relative inline-flex shrink-0 items-center justify-center rounded-full bg-white border-gray-200 border-2 shadow-md cursor-pointer transition-colors ${className}`}
       tabIndex={0}
       role="button"
       aria-haspopup="true"
@@ -112,6 +120,7 @@ function DockLabel({ children, className = '', isHovered }: DockLabelProps) {
 
   useEffect(() => {
     if (!isHovered) return;
+    setIsVisible(isHovered.get() === 1);
     const unsubscribe = isHovered.on('change', (latest: number) => {
       setIsVisible(latest === 1);
     });
@@ -125,8 +134,8 @@ function DockLabel({ children, className = '', isHovered }: DockLabelProps) {
           initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: -10 }}
           exit={{ opacity: 0, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className={`${className} absolute -top-6 left-1/2 w-fit whitespace-pre rounded-md border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-700 font-medium shadow-lg`}
+          transition={{ duration: 0.15 }}
+          className={`${className} absolute -top-8 left-1/2 w-fit whitespace-pre rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs text-gray-700 font-semibold shadow-lg pointer-events-none select-none z-30`}
           role="tooltip"
           style={{ x: '-50%' }}
         >
@@ -165,17 +174,20 @@ export default function Dock({
   const height = useSpring(heightRow, spring);
 
   return (
-    <motion.div style={{ height, scrollbarWidth: 'none' }} className="mx-2 flex max-w-full items-center">
+    <motion.div
+      style={{ height, scrollbarWidth: 'none' }}
+      className="relative mx-auto flex max-w-full items-end justify-center pointer-events-none"
+    >
       <motion.div
         onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
           isHovered.set(1);
-          mouseX.set(e.pageX);
+          mouseX.set(e.clientX);
         }}
         onMouseLeave={() => {
           isHovered.set(0);
           mouseX.set(Infinity);
         }}
-        className={`${className} absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-end w-fit gap-4 rounded-2xl border-gray-200 border-2 bg-white pb-2 px-4 shadow-xl`}
+        className={`${className} pointer-events-auto flex items-end justify-center w-fit gap-2 sm:gap-3.5 rounded-2xl border-gray-200 border-2 bg-white/95 backdrop-blur-md pb-2 px-3 sm:px-4 shadow-xl max-w-[calc(100vw-1rem)]`}
         style={{ height: panelHeight }}
         role="toolbar"
         aria-label="Application dock"

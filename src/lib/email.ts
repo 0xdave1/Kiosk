@@ -140,7 +140,7 @@ function renderEmailShell({
 						<p style="margin: 0 0 4px 0;">Best regards,</p>
 						<p style="margin: 0 0 8px 0; font-weight: 700; color: #111827;">The Kiosk Team</p>
 						<p style="margin: 0;">
-							<a href="https://kioosk.online" style="color: #004ac6; text-decoration: none;">kioosk.online</a>
+							<a href="https://kioosk.online" style="color: #004ac6; text-decoration: none;">kioosk.online</a> &bull; <a href="https://wa.me/2348116062226" style="color: #004ac6; text-decoration: none;">WhatsApp: +234 811 606 2226</a>
 						</p>
 					</div>
 				</div>
@@ -623,7 +623,7 @@ export async function sendSupportTicketEmail(payload: SupportTicketPayload) {
 			Our team has been notified and will review your request. Our typical response time is within <strong>2 to 4 hours</strong> during regular business operations.
 		</p>
 		<p style="margin: 0 0 16px 0;">
-			If you need urgent real-time updates, you can also reach us directly on WhatsApp or reply to this email with any additional details.
+			If you need urgent real-time updates, you can also reach us <a href="https://wa.me/2348116062226" style="color: #004ac6; font-weight: 600; text-decoration: underline;">directly on WhatsApp (+234 811 606 2226)</a> or reply to this email with any additional details.
 		</p>
 	`;
 

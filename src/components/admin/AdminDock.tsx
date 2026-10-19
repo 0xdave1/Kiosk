@@ -70,13 +70,13 @@ export default function AdminDock() {
 	];
 
 	return (
-		<div className="fixed bottom-0 left-0 right-0 z-50">
+		<div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none flex justify-center pb-2">
 			<Dock
 				items={dockItems}
 				panelHeight={68}
-				baseItemSize={50}
-				magnification={70}
-				distance={200}
+				baseItemSize={48}
+				magnification={66}
+				distance={180}
 			/>
 		</div>
 	);

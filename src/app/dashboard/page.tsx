@@ -985,7 +985,14 @@ export default function DashboardPage() {
 										</>
 									)}
 								</button>
-								<div className="pt-2 text-center">
+								<div className="pt-2 flex flex-col items-center gap-1.5 text-center">
+									<a
+										href="https://wa.me/2348116062226?text=Hi%20Kiosk%20Support%2C%20I%20need%20assistance%20with%20my%20dashboard"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline">
+										Chat on WhatsApp (+234 811 606 2226) &rarr;
+									</a>
 									<Link
 										href="/contact"
 										onClick={() => setIsSupportOpen(false)}

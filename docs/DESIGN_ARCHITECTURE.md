@@ -26,6 +26,7 @@ This document describes the visual and component architecture for the `kiosk` we
 ## Visual System
 
 ### Color Tokens
+
 - **Light Portal Tokens**:
   - `--color-background` (`#f8fafc`) — Primary app background.
   - `--color-primary` (`#004ac6`) — Brand primary blue accent.
@@ -41,6 +42,7 @@ This document describes the visual and component architecture for the `kiosk` we
   - `--preview-dark-text` (`#ffffff` headings, `#cbd5e1` body, `#94a3b8` labels).
 
 ### Typography Tokens
+
 - **Nohemi**: Primary body and UI heading font (`var(--font-nohemi)`).
 - **Thunder**: High-impact display font (`var(--font-thunder)`, `var(--font-thunder-lc)`).
 - **Dynamic Google Fonts**: Injected on-demand in the Live Preview modal based on client preference (`Inter`, `Playfair Display`, `Outfit`, `Montserrat`, `Roboto`, `Cinzel`, etc.).
@@ -51,6 +53,7 @@ This document describes the visual and component architecture for the `kiosk` we
 ## Component Hierarchy & Layout Rules
 
 ### Public Marketing Site
+
 - **Header Navigation**: `NavbarWrapper` conditionally renders `Navbar` / `StaggeredMenu` on public marketing pages (`/`, `/about`, `/pricing`, `/services`, `/contact`).
 - **Services Page (`/services`)**:
   - **Hero**: Architectural grid lines, minimal technical crosshairs (`+`), and interactive Lottie canvas tabs (*Sales Funnel*, *Landing Page*, *E-Commerce*).
@@ -65,6 +68,7 @@ This document describes the visual and component architecture for the `kiosk` we
   - Dark background (`#03152c`), brand links, email contact, social links, back-to-top button, and edge-to-edge typography.
 
 ### Dashboard Application (`/dashboard/*`)
+
 - **Header**: Sticky brand logo header bar with dynamic time-based greeting (*Good morning / afternoon / evening*), notification icon trigger, and interactive profile dropdown menu (*Account Settings*, *Billing & Plan*, *Log Out*).
 - **Navigation Dock (`Sidebar.tsx`)**: Bottom floating `<Dock />` component using Framer Motion magnification effects for quick route switching (`/dashboard`, `/dashboard/projects`, `/dashboard/templates`, `/dashboard/billing`, `/dashboard/settings`).
 - **Main Views**:
@@ -87,4 +91,3 @@ This document describes the visual and component architecture for the `kiosk` we
   - **`E_COMMERCE`**: Product catalog cards with photography frames, multi-currency pricing, and slide-out cart drawer with direct WhatsApp ordering and gateway test checkout.
 - **Viewport Agility**: Switches dynamically between Desktop full-screen mode and Mobile smartphone mockup frame.
 - **Theme Switcher**: Live toggle between Light Mode and Midnight Dark Mode inside preview top toolbar.
-
