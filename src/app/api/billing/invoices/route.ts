@@ -20,9 +20,28 @@ export async function GET() {
 		}
 
 		// Fetch all invoices for tenant ordered by creation date
-		const tenantInvoices = await db.query.invoices.findMany({
+		const rawInvoices = await db.query.invoices.findMany({
 			where: eq(invoices.tenantId, tenant.id),
 			orderBy: [desc(invoices.createdAt)],
+		});
+
+		// Sanitize legacy payment links
+		const tenantInvoices = rawInvoices.map((inv) => {
+			let link = inv.paymentLink;
+			if (link && (link.includes("paystack.com") || link.includes("flutterwave.com"))) {
+				const planKey =
+					(inv.plan || "LANDING_PAGE").toLowerCase().includes("store") ||
+					(inv.plan || "").toLowerCase().includes("commerce")
+						? "store"
+						: (inv.plan || "").toLowerCase().includes("funnel")
+						? "funnel"
+						: "landing";
+				link = `/checkout?plan=${planKey}&billing=${inv.billingCycle || "monthly"}&invoice=${inv.invoiceNumber}`;
+			}
+			return {
+				...inv,
+				paymentLink: link,
+			};
 		});
 
 		// Identify pending or grace period invoice

@@ -281,20 +281,35 @@ export function BillingPageContent() {
 
 							{pendingInvoice.paymentLink && (
 								<div className="shrink-0">
-									<a
-										href={pendingInvoice.paymentLink}
-										target="_blank"
-										rel="noopener noreferrer"
-										className={`inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xs shadow-md transition-all ${
-											pendingInvoice.status === "PAST_DUE"
-												? "bg-red-600 hover:bg-red-700 text-white"
-												: pendingInvoice.status === "GRACE_PERIOD"
-												? "bg-amber-600 hover:bg-amber-700 text-white"
-												: "bg-blue-600 hover:bg-blue-700 text-white"
-										}`}>
-										<span>Pay Invoice ({pendingInvoice.currency} {pendingInvoice.amount}.00)</span>
-										<ExternalLink className="w-3.5 h-3.5" />
-									</a>
+									{pendingInvoice.paymentLink.startsWith("/") ? (
+										<Link
+											href={pendingInvoice.paymentLink}
+											className={`inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xs shadow-md transition-all ${
+												pendingInvoice.status === "PAST_DUE"
+													? "bg-red-600 hover:bg-red-700 text-white"
+													: pendingInvoice.status === "GRACE_PERIOD"
+													? "bg-amber-600 hover:bg-amber-700 text-white"
+													: "bg-blue-600 hover:bg-blue-700 text-white"
+											}`}>
+											<span>Pay Invoice ({pendingInvoice.currency} {pendingInvoice.amount}.00)</span>
+											<ArrowRight className="w-3.5 h-3.5" />
+										</Link>
+									) : (
+										<a
+											href={pendingInvoice.paymentLink}
+											target="_blank"
+											rel="noopener noreferrer"
+											className={`inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xs shadow-md transition-all ${
+												pendingInvoice.status === "PAST_DUE"
+													? "bg-red-600 hover:bg-red-700 text-white"
+													: pendingInvoice.status === "GRACE_PERIOD"
+													? "bg-amber-600 hover:bg-amber-700 text-white"
+													: "bg-blue-600 hover:bg-blue-700 text-white"
+											}`}>
+											<span>Pay Invoice ({pendingInvoice.currency} {pendingInvoice.amount}.00)</span>
+											<ExternalLink className="w-3.5 h-3.5" />
+										</a>
+									)}
 								</div>
 							)}
 						</div>
@@ -443,14 +458,23 @@ export function BillingPageContent() {
 									</button>
 								) : (
 									pendingInvoice?.paymentLink ? (
-										<a
-											href={pendingInvoice.paymentLink}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="px-5 py-2.5 rounded-full text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition-all shadow-xs flex items-center gap-2">
-											<CreditCard className="w-3.5 h-3.5" />
-											<span>Pay & Enable Auto-Debit</span>
-										</a>
+										pendingInvoice.paymentLink.startsWith("/") ? (
+											<Link
+												href={pendingInvoice.paymentLink}
+												className="px-5 py-2.5 rounded-full text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition-all shadow-xs flex items-center gap-2">
+												<CreditCard className="w-3.5 h-3.5" />
+												<span>Pay & Enable Auto-Debit</span>
+											</Link>
+										) : (
+											<a
+												href={pendingInvoice.paymentLink}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="px-5 py-2.5 rounded-full text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition-all shadow-xs flex items-center gap-2">
+												<CreditCard className="w-3.5 h-3.5" />
+												<span>Pay & Enable Auto-Debit</span>
+											</a>
+										)
 									) : (
 										<div className="text-xs text-amber-800 font-medium">
 											Pay with Card on next renewal to enable auto-debit
@@ -642,14 +666,23 @@ export function BillingPageContent() {
 															<span>Receipt Emailed</span>
 														</span>
 													) : inv.paymentLink ? (
-														<a
-															href={inv.paymentLink}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shadow-xs transition-colors">
-															<span>Pay Now</span>
-															<ExternalLink className="w-3 h-3" />
-														</a>
+														inv.paymentLink.startsWith("/") ? (
+															<Link
+																href={inv.paymentLink}
+																className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shadow-xs transition-colors">
+																<span>Pay Now</span>
+																<ArrowRight className="w-3 h-3" />
+															</Link>
+														) : (
+															<a
+																href={inv.paymentLink}
+																target="_blank"
+																rel="noopener noreferrer"
+																className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shadow-xs transition-colors">
+																<span>Pay Now</span>
+																<ExternalLink className="w-3 h-3" />
+															</a>
+														)
 													) : (
 														<span className="text-gray-400 text-[11px]">Pending Link</span>
 													)}

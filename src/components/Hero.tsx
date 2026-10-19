@@ -226,19 +226,6 @@ export default function Hero() {
 				<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center">
 					{/* Left Column: Simplified Headlines & CTAs */}
 					<div className="lg:col-span-5 space-y-6 sm:space-y-7 text-center lg:text-left">
-						{/* Eyebrow Value Proposition Badge */}
-						<ScrollReveal direction="up" delay={40}>
-							<div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50/90 border border-blue-200/80 shadow-2xs mb-1">
-								<span className="flex h-2 w-2 relative">
-									<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-									<span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-								</span>
-								<span className="text-xs sm:text-[13px] font-bold text-blue-700 tracking-wide">
-									Helping businesses get found and chosen
-								</span>
-							</div>
-						</ScrollReveal>
-
 						{/* Main Headline */}
 						<ScrollReveal direction="up" delay={80}>
 							<div className="relative">
