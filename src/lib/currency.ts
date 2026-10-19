@@ -37,7 +37,7 @@ export const CURRENCIES: Record<string, CurrencyConfig> = {
 		code: "NGN",
 		symbol: "₦",
 		locale: "en-NG",
-		rateFromUSD: 777600 / 583.99, // ~1331.53 NGN/USD
+		rateFromUSD: 777600 / 583.99, // ~1331.53 NGN/USD (Bachs baseline)
 		label: "Nigerian Naira",
 	},
 	GHS: {
@@ -213,9 +213,9 @@ export const COUNTRY_TO_CURRENCY: Record<string, string> = {
  * Yearly is monthly × 12 × 0.8 (20% discount).
  */
 export const BASE_PRICES_USD = {
-	landing: { monthly: 15, yearly: 144 },
-	funnel: { monthly: 30, yearly: 288 },
-	store: { monthly: 50, yearly: 480 },
+	landing: { monthly: 18.25, yearly: 175.2 },
+	funnel: { monthly: 36.5, yearly: 350.39 },
+	store: { monthly: 60.83, yearly: 583.99 },
 } as const;
 
 export type PlanKey = keyof typeof BASE_PRICES_USD;
