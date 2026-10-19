@@ -69,14 +69,25 @@ export default function AdminDock() {
 		},
 	];
 
+	const [isMobile, setIsMobile] = React.useState(false);
+
+	React.useEffect(() => {
+		const checkMobile = () => {
+			setIsMobile(window.innerWidth < 640);
+		};
+		checkMobile();
+		window.addEventListener("resize", checkMobile);
+		return () => window.removeEventListener("resize", checkMobile);
+	}, []);
+
 	return (
-		<div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none flex justify-center pb-2">
+		<div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none flex justify-center pb-[max(0.75rem,env(safe-area-inset-bottom,0.75rem))] px-2">
 			<Dock
 				items={dockItems}
-				panelHeight={68}
-				baseItemSize={48}
-				magnification={66}
-				distance={180}
+				panelHeight={isMobile ? 56 : 66}
+				baseItemSize={isMobile ? 40 : 48}
+				magnification={isMobile ? 40 : 66}
+				distance={isMobile ? 0 : 180}
 			/>
 		</div>
 	);

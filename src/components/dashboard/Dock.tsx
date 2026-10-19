@@ -39,6 +39,7 @@ type DockItemProps = {
   baseItemSize: number;
   magnification: number;
   label?: React.ReactNode;
+  isTouch?: boolean;
 };
 
 function DockItem({
@@ -50,12 +51,14 @@ function DockItem({
   distance,
   magnification,
   baseItemSize,
-  label
+  label,
+  isTouch = false
 }: DockItemProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isHovered = useMotionValue(0);
 
   const mouseDistance = useTransform(mouseX, (val: number) => {
+    if (isTouch || distance === 0) return 9999;
     const rect = ref.current?.getBoundingClientRect() ?? {
       x: 0,
       width: baseItemSize
@@ -63,7 +66,11 @@ function DockItem({
     return val - (rect.x + (rect.width || baseItemSize) / 2);
   });
 
-  const targetSize = useTransform(mouseDistance, [-distance, 0, distance], [baseItemSize, magnification, baseItemSize]);
+  const targetSize = useTransform(
+    mouseDistance,
+    [-distance, 0, distance],
+    [baseItemSize, isTouch ? baseItemSize : magnification, baseItemSize]
+  );
   const size = useSpring(targetSize, spring);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -85,12 +92,12 @@ function DockItem({
     <motion.div
       ref={ref}
       style={{
-        width: size,
-        height: size
+        width: isTouch ? baseItemSize : size,
+        height: isTouch ? baseItemSize : size
       }}
-      onHoverStart={() => isHovered.set(1)}
+      onHoverStart={() => !isTouch && isHovered.set(1)}
       onHoverEnd={() => isHovered.set(0)}
-      onFocus={() => isHovered.set(1)}
+      onFocus={() => !isTouch && isHovered.set(1)}
       onBlur={() => isHovered.set(0)}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -132,10 +139,10 @@ function DockLabel({ children, className = '', isHovered }: DockLabelProps) {
       {isVisible && (
         <motion.div
           initial={{ opacity: 0, y: 0 }}
-          animate={{ opacity: 1, y: -10 }}
+          animate={{ opacity: 1, y: -8 }}
           exit={{ opacity: 0, y: 0 }}
-          transition={{ duration: 0.15 }}
-          className={`${className} absolute -top-8 left-1/2 w-fit whitespace-pre rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs text-gray-700 font-semibold shadow-lg pointer-events-none select-none z-30`}
+          transition={{ duration: 0.12 }}
+          className={`${className} absolute -top-8 left-1/2 w-fit whitespace-pre rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs text-gray-700 font-semibold shadow-lg pointer-events-none select-none z-30 hidden sm:block`}
           role="tooltip"
           style={{ x: '-50%' }}
         >
@@ -163,31 +170,44 @@ export default function Dock({
   magnification = 70,
   distance = 200,
   panelHeight = 64,
-  dockHeight = 256,
   baseItemSize = 50
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);
   const isHovered = useMotionValue(0);
+  const [isTouch, setIsTouch] = useState(false);
 
-  const maxHeight = useMemo(() => Math.max(dockHeight, magnification + magnification / 2 + 4), [dockHeight, magnification]);
-  const heightRow = useTransform(isHovered, [0, 1], [panelHeight, maxHeight]);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkTouch = () => {
+        setIsTouch(window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 640);
+      };
+      checkTouch();
+      window.addEventListener('resize', checkTouch);
+      return () => window.removeEventListener('resize', checkTouch);
+    }
+  }, []);
+
+  const maxHeight = useMemo(() => Math.max(panelHeight, magnification + 6), [panelHeight, magnification]);
+  const heightRow = useTransform(isHovered, [0, 1], [panelHeight, isTouch ? panelHeight : maxHeight]);
   const height = useSpring(heightRow, spring);
 
   return (
     <motion.div
-      style={{ height, scrollbarWidth: 'none' }}
+      style={{ height: isTouch ? panelHeight : height }}
       className="relative mx-auto flex max-w-full items-end justify-center pointer-events-none"
     >
       <motion.div
         onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
-          isHovered.set(1);
-          mouseX.set(e.clientX);
+          if (!isTouch) {
+            isHovered.set(1);
+            mouseX.set(e.clientX);
+          }
         }}
         onMouseLeave={() => {
           isHovered.set(0);
           mouseX.set(Infinity);
         }}
-        className={`${className} pointer-events-auto flex items-end justify-center w-fit gap-2 sm:gap-3.5 rounded-2xl border-gray-200 border-2 bg-white/95 backdrop-blur-md pb-2 px-3 sm:px-4 shadow-xl max-w-[calc(100vw-1rem)]`}
+        className={`${className} pointer-events-auto flex items-center justify-start sm:justify-center w-fit gap-2 sm:gap-3 rounded-2xl border-gray-200/90 border-2 bg-white/95 backdrop-blur-md px-2.5 sm:px-4 shadow-xl max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-visible scrollbar-none`}
         style={{ height: panelHeight }}
         role="toolbar"
         aria-label="Application dock"
@@ -199,10 +219,11 @@ export default function Dock({
             className={item.className}
             mouseX={mouseX}
             spring={spring}
-            distance={distance}
-            magnification={magnification}
+            distance={isTouch ? 0 : distance}
+            magnification={isTouch ? baseItemSize : magnification}
             baseItemSize={baseItemSize}
             label={item.label}
+            isTouch={isTouch}
           >
             <DockIcon>{item.icon}</DockIcon>
             <DockLabel>{item.label}</DockLabel>
