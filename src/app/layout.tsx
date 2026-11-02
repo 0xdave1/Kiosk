@@ -12,6 +12,7 @@ import { CurrencyProvider } from "@/context/CurrencyContext";
 import { Analytics } from "@vercel/analytics/next";
 import { headers } from "next/headers";
 import { resolveTenantBranding } from "@/lib/tenantBranding";
+import PWARegistration from "@/components/PWARegistration";
 
 const montserrat = Montserrat({
 	subsets: ["latin"],
@@ -163,6 +164,7 @@ export const metadata: Metadata = {
 		statusBarStyle: "default",
 		title: "Kiosk",
 	},
+	manifest: "/manifest.webmanifest",
 	formatDetection: {
 		telephone: false,
 	},
@@ -230,6 +232,7 @@ export default async function RootLayout({
 				/>
 			</head>
 			<body className={`${montserrat.className} font-montserrat antialiased`}>
+				<PWARegistration />
 				<PageLoader
 					initialClientLogo={initialClientLogo}
 					initialBusinessName={initialBusinessName}

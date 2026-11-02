@@ -92,7 +92,10 @@ export async function middleware(request: NextRequest) {
 		pathname.startsWith("/api") ||
 		pathname.startsWith("/tenants") ||
 		pathname.startsWith("/domains") ||
-		pathname.startsWith("/_next");
+		pathname.startsWith("/_next") ||
+		pathname === "/manifest.webmanifest" ||
+		pathname === "/sw.js" ||
+		pathname.startsWith("/icons/");
 
 	if (!isRootDomain && !isInternalOrApiRoute) {
 		// Scenario A: Subdomain format (e.g. "bella-bakery.kioosk.online" or "bella-bakery.localhost")
@@ -132,6 +135,6 @@ export async function middleware(request: NextRequest) {
  */
 export const config = {
 	matcher: [
-		"/((?!_next/static|_next/image|favicon.ico|fonts/|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2)$).*)",
+		"/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|fonts/|images/|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2)$).*)",
 	],
 };
