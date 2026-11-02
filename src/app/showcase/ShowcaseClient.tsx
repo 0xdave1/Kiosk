@@ -214,7 +214,7 @@ export default function ShowcaseClient({ businesses }: ShowcaseClientProps) {
 						</div>
 						<h3 className="text-lg font-bold text-gray-900">No matching businesses found</h3>
 						<p className="text-xs text-gray-500 max-w-sm mx-auto">
-							We couldn't find any launched websites matching &ldquo;{searchQuery}&rdquo;. Try another
+							We could not find any launched websites matching &ldquo;{searchQuery}&rdquo;. Try another
 							search query or reset your filters.
 						</p>
 						<button
