@@ -62,6 +62,17 @@ Everything is hosted and managed for you. No technical setup. No complicated bui
 
 Open [http://localhost:3000](http://localhost:3000) to preview locally.
 
+### PWA validation
+
+PWA features are enabled for production builds. Run `npm run build && npm run start`,
+then open `http://localhost:3000` in Chrome. In DevTools, verify that
+`/manifest.webmanifest` and `/sw.js` load, the service worker is activated under
+**Application > Service Workers**, and the manifest reports the Kiosk name, theme
+color, and icons. Use **Application > Service Workers > Offline** to confirm that
+previously visited public pages load from cache and an uncached page shows the
+offline fallback. Lighthouse should report the app as installable after the
+service worker has completed its first activation.
+
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router & Edge Middleware)
